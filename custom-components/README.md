@@ -23,6 +23,12 @@
 <img width="388" height="214" alt="prism-media" src="https://github.com/user-attachments/assets/5429e0f0-268f-496e-8ccb-2485fbc9bd30" />
 
 
+## prism-calendar
+
+<img width="386" height="367" alt="prism-calendar" src="https://github.com/user-attachments/assets/d95ac18e-bd1b-4de4-ab78-248ac027bbd9" />
+
+
+
 
 Eine benutzerdefinierte Thermostat-Knob-Karte mit Glassmorphism-Design.
 
