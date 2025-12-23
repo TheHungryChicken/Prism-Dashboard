@@ -1,16 +1,42 @@
-🔮 Prism-Dashboard
+Prism-Dashboard
+
+💎 A modern, glassmorphism-styled dashboard for Home Assistant based on Mushroom Cards.
+
+Screenshots
+
+<img src="images/screenshots/dashboard-main.png" width="49%" /> <img src="images/screenshots/dashboard-mobile.png" width="49%" />
+
+<img src="images/screenshots/tablet-view.png" width="49%" /> <img src="images/screenshots/popup-view.png" width="49%" />
+
+Table of Contents
+
+What is Prism?
+
+Features
+
+Requirements
+
+Installation
+
+Configuration
+
+Support / Feedback
+
+Contributing
+
+Sponsorship
+
+What is Prism?
 
 Prism ist ein modernes, responsives Home Assistant Dashboard im Glassmorphism-Design. Es kombiniert halbtransparente Oberflächen mit Neumorphismus-Elementen für haptisches Feedback und nutzt intelligente YAML-Anker, um den Code schlank und wartbar zu halten.
 
-(Füge hier später einen Screenshot deines Dashboards ein)
-
-✨ Features
+Features
 
 💎 Glassmorphism UI: Halbtransparente "Frosted Glass" Karten mit Unschärfe-Effekten.
 
 👆 Haptisches Feedback: Aktive Buttons wirken "eingedrückt" (Neumorphismus).
 
-🧭 Smart Navigation: Animierte Navigationsleiste, die den aktuellen Raum hervorhebt.
+🧭 Smart Navigation: Animierte Navigationsleiste, die den aktuellen Raum automatisch hervorhebt.
 
 🌈 Status Glow: Icons leuchten je nach Zustand in passenden Farben (Grün für Sicherheit, Orange für Heizung, etc.).
 
@@ -18,7 +44,7 @@ Prism ist ein modernes, responsives Home Assistant Dashboard im Glassmorphism-De
 
 🧹 Clean Code: Nutzt YAML-Anker (& und *), um Wiederholungen zu vermeiden und globale Style-Änderungen zu vereinfachen.
 
-🛠️ Voraussetzungen
+Requirements
 
 Damit dieses Dashboard funktioniert, müssen folgende Frontend-Integrationen über HACS (Home Assistant Community Store) installiert sein:
 
@@ -50,7 +76,7 @@ Browser Mod
 
 Wichtig für Popups (z.B. Kalender oder Staubsauger).
 
-🚀 Installation
+Installation
 
 1. Dateien vorbereiten
 
@@ -86,7 +112,7 @@ WICHTIG: Passe die Entitäten an deine Hardware an (siehe unten).
 
 Klicke auf Speichern.
 
-⚙️ Konfiguration & Anpassung
+Configuration
 
 Das Dashboard nutzt generische Platzhalter (z.B. light.living_room_light). Diese existieren in deinem System nicht und müssen durch deine echten Entitäten ersetzt werden.
 
@@ -94,47 +120,17 @@ Entitäten anpassen (Suchen & Ersetzen)
 
 Öffne den Raw-Config-Editor und suche (STRG+F) nach folgenden englischen Platzhaltern, um sie mit deinen Geräten zu ersetzen:
 
-Kameras:
+Kameras: camera.garden_main, camera.front_door, camera.terrace, camera.driveway
 
-camera.garden_main
+Licht: light.kitchen_strip, light.kitchen_bar, light.living_room_light, light.office_desk, etc.
 
-camera.front_door
+Schalter: switch.pond_pump, switch.workshop_equipment, switch.bedroom_light
 
-camera.terrace
+Sensoren: sensor.outdoor_temperature, sensor.power_total_consumption, sensor.kitchen_temperature
 
-camera.driveway
+Klima: climate.living_room, climate.office, climate.bathroom_upstairs
 
-Licht & Schalter:
-
-light.kitchen_strip, light.kitchen_bar
-
-switch.living_room_light (oder light.living_room)
-
-switch.office_main_light
-
-switch.bedroom_light
-
-switch.pond_pump
-
-Sensoren (Temperatur/Strom):
-
-sensor.outdoor_temperature
-
-sensor.power_total_consumption
-
-sensor.power_grid_feed
-
-sensor.kitchen_temperature / sensor.kitchen_humidity
-
-Klima / Thermostate:
-
-climate.living_room
-
-climate.office
-
-climate.bathroom_upstairs
-
-Spezial-Entitäten:
+Spezial:
 
 calendar.family_shared (Dein Kalender)
 
@@ -154,6 +150,18 @@ Dank der YAML-Anker musst du Styles oft nur an einer Stelle im Code ändern, um 
 
 &mush_card_style: Der Haupt-Style für die Glassmorphismus-Karten.
 
-📄 Lizenz
+Support / Feedback
 
-Dieses Projekt ist unter der MIT Lizenz veröffentlicht. Fühl dich frei, es zu kopieren, anzupassen und zu teilen!
+Any bugs or feature requests? Contact me here or click on the "Issues" tab in the GitHub repository!
+
+Contributing
+
+Fork the repository and create pull requests.
+
+Sponsorship
+
+<a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FD26FHKRWS3US" target="_blank"><img src="https://pics.paypal.com/00/s/N2EwMzk4NzUtOTQ4Yy00Yjc4LWIwYmUtMTA3MWExNWIzYzMz/file.PNG" alt="SUPPORT" height="51"></a>
+
+Keywords
+
+home-assistant dashboard glassmorphism lovelace mushroom-cards yaml smart-home ui-design hacs minimalist
