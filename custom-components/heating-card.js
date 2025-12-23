@@ -1,5 +1,5 @@
 
-class HeatingKnobCard extends HTMLElement {
+class HeatingCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
@@ -13,11 +13,28 @@ class HeatingKnobCard extends HTMLElement {
   }
 
   static getStubConfig() {
-    return { entity: "climate.example", name: "Living Room" }
+    return { entity: "climate.example", name: "Living Room", color: "#fb923c" }
   }
 
-  static getConfigElement() {
-    return document.createElement("heating-knob-card-editor");
+  // Use getConfigForm for automatic form generation - more reliable than custom editor
+  static getConfigForm() {
+    return {
+      schema: [
+        {
+          name: "entity",
+          required: true,
+          selector: { entity: { domain: "climate" } }
+        },
+        {
+          name: "name",
+          selector: { text: {} }
+        },
+        {
+          name: "color",
+          selector: { text: {} }
+        }
+      ]
+    };
   }
 
   setConfig(config) {
@@ -25,6 +42,10 @@ class HeatingKnobCard extends HTMLElement {
       throw new Error('Please define an entity');
     }
     this.config = config;
+    // Default color if not set
+    if (!this.config.color) {
+      this.config.color = "#fb923c";
+    }
   }
 
   set hass(hass) {
@@ -200,7 +221,7 @@ class HeatingKnobCard extends HTMLElement {
   }
 
   render() {
-    console.log('HeatingKnobCard render v2');
+    console.log('HeatingCard render v2');
     const isHeating = this._state === 'heat';
     const isAuto = this._state === 'auto';
     const isCooling = this._state === 'cool';
@@ -249,6 +270,8 @@ class HeatingKnobCard extends HTMLElement {
           padding: 20px;
           color: white;
           user-select: none;
+          overflow: hidden;
+          box-sizing: border-box;
         }
         .header {
             display: flex; align-items: center; gap: 16px; margin-bottom: 24px;
@@ -274,9 +297,9 @@ class HeatingKnobCard extends HTMLElement {
             filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.6));
         }
 
-        .title-area { flex: 1; }
-        .title { font-size: 18px; font-weight: 500; color: #e0e0e0; line-height: 1.2; }
-        .subtitle { font-size: 13px; color: #9ca3af; line-height: 1.2; margin-top: 2px; }
+        .title-area { flex: 1; min-width: 0; overflow: hidden; }
+        .title { font-size: 18px; font-weight: 500; color: #e0e0e0; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .subtitle { font-size: 13px; color: #9ca3af; line-height: 1.2; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         .status-badge {
             padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase;
@@ -287,8 +310,9 @@ class HeatingKnobCard extends HTMLElement {
         .status-badge.cool { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
         
         .knob-container {
-            position: relative; width: 100%; max-width: 250px; aspect-ratio: 1 / 1; margin: 0 auto 24px auto;
+            position: relative; width: 100%; max-width: 250px; min-width: 0; aspect-ratio: 1 / 1; margin: 0 auto 24px auto;
             display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
         }
         .inlet-track {
             position: absolute; inset: 6.4%; border-radius: 50%;
@@ -307,15 +331,16 @@ class HeatingKnobCard extends HTMLElement {
             box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.1);
             border: 1px solid rgba(255,255,255,0.05);
             display: flex; justify-content: center; align-items: center; cursor: pointer;
+            overflow: hidden;
         }
         .indicator {
             position: absolute; top: 12px; width: 6px; height: 6px; border-radius: 50%;
-            background: #fb923c; box-shadow: 0 0 8px rgba(251, 146, 60, 0.8);
+            background: ${this.config.color}; box-shadow: 0 0 8px ${this.config.color}CC;
         }
-        .temp-display { text-align: center; }
+        .temp-display { text-align: center; overflow: hidden; width: 100%; }
         /* Explicitly set font size and avoid layout shift */
-        .temp-val { font-size: 36px; font-weight: 700; color: white; line-height: 1; min-width: 80px; }
-        .temp-label { font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-top: 4px; }
+        .temp-val { font-size: 36px; font-weight: 700; color: white; line-height: 1; min-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .temp-label { font-size: 10px; text-transform: uppercase; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .controls {
             display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
@@ -325,6 +350,7 @@ class HeatingKnobCard extends HTMLElement {
             border: 1px solid rgba(255,255,255,0.05);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s; color: rgba(255,255,255,0.6);
+            overflow: hidden; min-width: 0;
         }
         .mode-btn:active, .mode-btn.active {
             background: rgba(20, 20, 20, 0.8);
@@ -337,7 +363,7 @@ class HeatingKnobCard extends HTMLElement {
         .mode-btn.active.off { color: #ef5350; }
         
         ha-icon { --mdc-icon-size: 20px; }
-        .btn-label { font-size: 9px; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+        .btn-label { font-size: 9px; font-weight: 700; text-transform: uppercase; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 
       </style>
       <div class="card">
@@ -347,7 +373,7 @@ class HeatingKnobCard extends HTMLElement {
             </div>
             <div class="title-area">
                 <div class="title">${this.config.name || 'Heizung'}</div>
-                <div class="subtitle">${currentModeText} · ${this._currentTemp.toFixed(1)} °C</div>
+                <div class="subtitle">${this._currentTemp.toFixed(1)} °C</div>
             </div>
         </div>
         
@@ -355,13 +381,13 @@ class HeatingKnobCard extends HTMLElement {
             <div class="inlet-track"></div>
             <svg viewBox="0 0 200 200">
                 <defs>
-                   <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
-                     <stop offset="0%" style="stop-color:#fb923c;stop-opacity:0.4" />
-                     <stop offset="100%" style="stop-color:#fb923c;stop-opacity:1" />
+                   <linearGradient id="grad1-${this.config.entity.replace(/[^a-zA-Z0-9]/g, '')}" x1="0%" y1="0%" x2="100%" y2="0%">
+                     <stop offset="0%" style="stop-color:${this.config.color};stop-opacity:0.4" />
+                     <stop offset="100%" style="stop-color:${this.config.color};stop-opacity:1" />
                    </linearGradient>
                 </defs>
                 <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="16" stroke-dasharray="${strokeDashArray}" stroke-linecap="round" />
-                <circle id="active-arc" cx="100" cy="100" r="80" fill="none" stroke="url(#grad1)" stroke-width="16" 
+                <circle id="active-arc" cx="100" cy="100" r="80" fill="none" stroke="url(#grad1-${this.config.entity.replace(/[^a-zA-Z0-9]/g, '')})" stroke-width="16" 
                         stroke-dasharray="${strokeDashArray}" 
                         stroke-dashoffset="${dashOffset}" 
                         stroke-linecap="round" />
@@ -397,99 +423,241 @@ class HeatingKnobCard extends HTMLElement {
   }
 }
 
-customElements.define('heating-knob-card', HeatingKnobCard);
-
-class HeatingKnobCardEditor extends HTMLElement {
+// Define Editor FIRST so it's available when getConfigElement() is called
+class HeatingCardEditor extends HTMLElement {
   constructor() {
     super();
     this._config = {};
+    this._hass = null;
   }
 
   setConfig(config) {
+    console.log('[HeatingCardEditor] setConfig() called with:', config);
+    const oldConfig = this._config;
     this._config = config || {};
-    this.render();
+    
+    // Only render if structure doesn't exist yet, otherwise just update values
+    if (this._hass) {
+      if (!this.querySelector('ha-entity-picker')) {
+        this.render();
+      } else {
+        this.updateValues();
+      }
+    }
   }
 
   configChanged(newConfig) {
     const event = new CustomEvent("config-changed", {
       bubbles: true,
       composed: true,
+      cancelable: false,
+      detail: { config: newConfig }
     });
-    event.detail = { config: newConfig };
     this.dispatchEvent(event);
   }
 
   set hass(hass) {
+    console.log('[HeatingCardEditor] hass set');
     this._hass = hass;
-    this.render();
+    if (this._config && !this.querySelector('ha-entity-picker')) {
+      this.render();
+    } else if (this._hass && this.querySelector('ha-entity-picker')) {
+      // Update hass on existing elements
+      const picker = this.querySelector('ha-entity-picker');
+      if (picker) {
+        picker.hass = this._hass;
+      }
+    }
   }
 
   connectedCallback() {
+    console.log('[HeatingCardEditor] connectedCallback() called');
     if (!this._config) {
       this._config = {};
     }
-    this.render();
+    // Render immediately when connected if not already rendered
+    if (this._hass && !this.querySelector('ha-entity-picker')) {
+      this.render();
+    }
+  }
+
+  updateValues() {
+    // Update values without re-rendering the entire structure
+    const picker = this.querySelector('ha-entity-picker');
+    if (picker && picker.value !== (this._config?.entity || '')) {
+      picker.value = this._config?.entity || '';
+    }
+
+    const nameField = this.querySelector('ha-textfield[label="Name (Optional)"]');
+    if (nameField && nameField.value !== (this._config?.name || '')) {
+      nameField.value = this._config?.name || '';
+    }
+
+    const colorField = this.querySelector('ha-textfield[label="Ring Color (Hex, e.g. #fb923c)"]');
+    const colorPicker = this.querySelector('input[type="color"]');
+    if (colorField && colorPicker) {
+      const currentColor = this._config?.color || '#fb923c';
+      if (colorField.value !== currentColor) {
+        colorField.value = currentColor;
+      }
+      if (colorPicker.value !== currentColor) {
+        colorPicker.value = currentColor;
+      }
+    }
   }
 
   render() {
     if (!this._hass) {
-      // Wait for hass to be set
+      console.log('[HeatingCardEditor] render() called but no hass yet');
       return;
     }
 
-    // Create structure if it doesn't exist
-    if (!this.querySelector('ha-entity-picker')) {
-        this.innerHTML = `
-          <div style="display: flex; flex-direction: column; gap: 12px; padding: 12px;">
-            <ha-entity-picker
-              label="Entity (Climate)"
-              allow-custom-entity
-            ></ha-entity-picker>
-            <ha-textfield
-              label="Name (Optional)"
-            ></ha-textfield>
-          </div>
-        `;
+    console.log('[HeatingCardEditor] render() called with config:', this._config);
 
-        // Add listeners
-        const picker = this.querySelector('ha-entity-picker');
-        if (picker) {
-          picker.addEventListener('value-changed', (e) => {
-              const newConfig = { ...this._config, entity: e.detail.value };
-              this.configChanged(newConfig);
-          });
-        }
+    // Always recreate to ensure proper initialization
+    this.innerHTML = `
+      <div style="display: flex; flex-direction: column; gap: 16px; padding: 16px;">
+        <ha-entity-picker
+          label="Entity (Climate)"
+          allow-custom-entity
+          style="display: block; width: 100%;"
+        ></ha-entity-picker>
+        <ha-textfield
+          label="Name (Optional)"
+          style="display: block; width: 100%;"
+        ></ha-textfield>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <ha-textfield
+            label="Ring Color (Hex, e.g. #fb923c)"
+            style="flex: 1; display: block;"
+          ></ha-textfield>
+          <input
+            type="color"
+            style="width: 60px; height: 56px; border-radius: 4px; border: 1px solid var(--divider-color); cursor: pointer; flex-shrink: 0;"
+          />
+        </div>
+      </div>
+    `;
 
-        const textField = this.querySelector('ha-textfield');
-        if (textField) {
-          textField.addEventListener('input', (e) => {
-              const newConfig = { ...this._config, name: e.target.value };
-              this.configChanged(newConfig);
-          });
-        }
-    }
-
-    // Update properties
-    const picker = this.querySelector('ha-entity-picker');
-    if (picker && this._hass) {
+    // Set properties and add listeners after DOM is ready
+    // Use setTimeout instead of requestAnimationFrame for better compatibility
+    setTimeout(() => {
+      const picker = this.querySelector('ha-entity-picker');
+      if (picker) {
+        console.log('[HeatingCardEditor] Setting up entity picker');
+        console.log('[HeatingCardEditor] Picker element:', picker);
+        console.log('[HeatingCardEditor] Picker computed style:', window.getComputedStyle(picker));
+        
+        // Set hass first, then other properties
         picker.hass = this._hass;
-        picker.value = this._config.entity || '';
         picker.includeDomains = ['climate'];
-    }
+        picker.value = this._config?.entity || '';
+        
+        // Make sure it's visible
+        picker.style.display = 'block';
+        picker.style.width = '100%';
+        picker.style.visibility = 'visible';
+        picker.style.opacity = '1';
+        
+        // Force update
+        if (picker.requestUpdate) {
+          picker.requestUpdate();
+        }
+        if (picker.updateComplete) {
+          picker.updateComplete.then(() => {
+            console.log('[HeatingCardEditor] Entity picker update complete');
+          });
+        }
+        
+        // Remove old listener if exists
+        if (this._pickerHandler) {
+          picker.removeEventListener('value-changed', this._pickerHandler);
+        }
+        this._pickerHandler = (e) => {
+          console.log('[HeatingCardEditor] Entity changed:', e.detail.value);
+          const newConfig = { ...this._config, entity: e.detail.value };
+          this._config = newConfig; // Update local config
+          this.configChanged(newConfig);
+        };
+        picker.addEventListener('value-changed', this._pickerHandler);
+        console.log('[HeatingCardEditor] Entity picker initialized with value:', picker.value);
+        console.log('[HeatingCardEditor] Entity picker parent:', picker.parentElement);
+      } else {
+        console.error('[HeatingCardEditor] Entity picker not found in DOM!');
+      }
 
-    const textField = this.querySelector('ha-textfield');
-    if (textField) {
-        textField.value = this._config.name || '';
-    }
+      const nameField = this.querySelector('ha-textfield[label="Name (Optional)"]');
+      if (nameField) {
+        console.log('[HeatingCardEditor] Setting up name field');
+        nameField.value = this._config?.name || '';
+        // Remove old listener if exists
+        if (this._nameFieldHandler) {
+          nameField.removeEventListener('input', this._nameFieldHandler);
+        }
+        this._nameFieldHandler = (e) => {
+          console.log('[HeatingCardEditor] Name changed:', e.target.value);
+          const newConfig = { ...this._config, name: e.target.value };
+          this._config = newConfig; // Update local config
+          this.configChanged(newConfig);
+        };
+        nameField.addEventListener('input', this._nameFieldHandler);
+      } else {
+        console.error('[HeatingCardEditor] Name field not found!');
+      }
+
+      const colorField = this.querySelector('ha-textfield[label="Ring Color (Hex, e.g. #fb923c)"]');
+      const colorPicker = this.querySelector('input[type="color"]');
+      if (colorField && colorPicker) {
+        console.log('[HeatingCardEditor] Setting up color fields');
+        const currentColor = this._config?.color || '#fb923c';
+        colorField.value = currentColor;
+        colorPicker.value = currentColor;
+        
+        // Sync color picker to text field
+        if (this._colorFieldHandler) {
+          colorField.removeEventListener('input', this._colorFieldHandler);
+        }
+        this._colorFieldHandler = (e) => {
+          const newColor = e.target.value;
+          console.log('[HeatingCardEditor] Color changed (text):', newColor);
+          colorPicker.value = newColor;
+          const newConfig = { ...this._config, color: newColor };
+          this._config = newConfig; // Update local config
+          this.configChanged(newConfig);
+        };
+        colorField.addEventListener('input', this._colorFieldHandler);
+        
+        // Sync text field to color picker
+        if (this._colorPickerHandler) {
+          colorPicker.removeEventListener('input', this._colorPickerHandler);
+        }
+        this._colorPickerHandler = (e) => {
+          const newColor = e.target.value;
+          console.log('[HeatingCardEditor] Color changed (picker):', newColor);
+          colorField.value = newColor;
+          const newConfig = { ...this._config, color: newColor };
+          this._config = newConfig; // Update local config
+          this.configChanged(newConfig);
+        };
+        colorPicker.addEventListener('input', this._colorPickerHandler);
+      } else {
+        console.error('[HeatingCardEditor] Color fields not found!');
+      }
+    }, 0);
   }
 }
 
-customElements.define("heating-knob-card-editor", HeatingKnobCardEditor);
+// Register Editor first
+customElements.define("heating-card-editor", HeatingCardEditor);
 
+// Then register the card
+customElements.define('heating-card', HeatingCard);
+
+// Register with customCards
 window.customCards = window.customCards || [];
 window.customCards.push({
-  type: "heating-knob-card",
-  name: "Heating Knob Card",
+  type: "heating-card",
+  name: "Heating Card",
   preview: true,
   description: "A custom thermostat knob card"
 });
