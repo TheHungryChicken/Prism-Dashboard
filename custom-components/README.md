@@ -130,6 +130,21 @@ Eine Staubsauger-Roboter-Karte mit Inlet-Styling, Animation und Saugleistungsste
 
 ---
 
+### prism-led
+
+Eine LED-Licht-Karte mit interaktivem Farbrad, Weiß-Temperatur-Steuerung und Helligkeitsregelung.
+
+<img width="400" alt="prism-led" src="images/prism-led.png" />
+
+**Verwendung:**
+```yaml
+- type: custom:prism-led
+  entity: light.living_room_led
+  name: Wohnzimmer LED
+```
+
+---
+
 ## Layout Components
 
 ### navigation-bar

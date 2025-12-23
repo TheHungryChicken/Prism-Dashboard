@@ -103,8 +103,11 @@ Damit dieses Dashboard funktioniert, müssen folgende Frontend-Integrationen üb
    - **Repository:** `https://github.com/BangerTech/Prism-Dashboard`
    - **Kategorie:** `Lovelace`
 4. Klicke auf **"Installieren"**
-5. Nach der Installation gehe zu **Einstellungen → Geräte & Dienste → Lovelace Dashboards → Ressourcen**
-6. Klicke auf **"Ressource hinzufügen"** und füge alle Custom Cards hinzu:
+5. **WICHTIG:** Nach der Installation müssen die Custom Cards manuell zu den Dashboard-Ressourcen hinzugefügt werden (HACS lädt die Dateien herunter, registriert sie aber nicht automatisch).
+6. Gehe zu **Einstellungen → Geräte & Dienste → Lovelace Dashboards → Ressourcen**
+7. Klicke auf **"Ressource hinzufügen"** und füge die gewünschten Custom Cards hinzu:
+   
+   **Dark Theme Karten:**
    - `/hacsfiles/prism-dashboard/custom-components/prism-heat.js`
    - `/hacsfiles/prism-dashboard/custom-components/prism-heat-small.js`
    - `/hacsfiles/prism-dashboard/custom-components/prism-button.js`
@@ -112,8 +115,21 @@ Damit dieses Dashboard funktioniert, müssen folgende Frontend-Integrationen üb
    - `/hacsfiles/prism-dashboard/custom-components/prism-calendar.js`
    - `/hacsfiles/prism-dashboard/custom-components/prism-shutter.js`
    - `/hacsfiles/prism-dashboard/custom-components/prism-shutter-vertical.js`
-7. Wähle für alle den Typ **"JavaScript-Modul"**
-8. Starte Home Assistant neu
+   - `/hacsfiles/prism-dashboard/custom-components/prism-vacuum.js`
+   
+   **Light Theme Karten (optional):**
+   - `/hacsfiles/prism-dashboard/custom-components/prism-heat-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-heat-small-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-button-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-media-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-calendar-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-shutter-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-shutter-vertical-light.js`
+   - `/hacsfiles/prism-dashboard/custom-components/prism-vacuum-light.js`
+   
+   > **Hinweis:** Du musst nur die Karten hinzufügen, die du auch tatsächlich verwenden möchtest. Du kannst Dark und Light Theme Karten auch parallel verwenden.
+8. Wähle für alle den Typ **"JavaScript-Modul"**
+9. Starte Home Assistant neu
 
 ### Option 2: Manuelle Installation
 
