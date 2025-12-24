@@ -5,7 +5,7 @@
 ---
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/6048858f-4ba0-40a8-95b8-7787cde1d8ab" alt="tac-dash-1" width="70%">
+  <img src="https://github.com/user-attachments/assets/6048858f-4ba0-40a8-95b8-7787cde1d8ab" alt="tac-dash-1" width="80%">
 </p>
 
 ---

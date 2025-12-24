@@ -145,6 +145,25 @@ Eine LED-Licht-Karte mit interaktivem Farbrad, Weiß-Temperatur-Steuerung und He
 
 ---
 
+### prism-sidebar
+
+Eine vollflächige Sidebar-Karte mit Kamera, Uhr, Kalender, Wetter-Forecast und Energie-Übersicht – ideal für Grid-Layouts mit eigener `sidebar`-Spalte.
+
+<img width="300" alt="prism-sidebar" src="images/prism-sidebar.png" />
+
+**Verwendung (Beispiel mit Grid-Layout):**
+```yaml
+type: custom:prism-sidebar
+camera_entity: camera.garden_main
+weather_entity: weather.home
+grid_entity: sensor.power_grid
+solar_entity: sensor.power_solar
+home_entity: sensor.power_home
+calendar_entity: calendar.termine
+```
+
+---
+
 ## Layout Components
 
 ### navigation-bar
