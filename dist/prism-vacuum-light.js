@@ -304,6 +304,12 @@ class PrismVacuumLightCard extends HTMLElement {
               display: flex; align-items: center; gap: 6px;
               font-size: 11px; color: #666;
           }
+          .controls-label ha-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
+          }
           .controls-label span { font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
           
           .home-btn {
@@ -311,6 +317,12 @@ class PrismVacuumLightCard extends HTMLElement {
               padding: 4px 10px; border-radius: 20px;
               border: 1px solid transparent;
               cursor: pointer; transition: all 0.2s;
+          }
+          .home-btn ha-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              flex-shrink: 0;
           }
           .home-btn.active {
               background: rgba(255, 255, 255, 0.9); color: #3b82f6;

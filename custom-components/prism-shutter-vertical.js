@@ -233,6 +233,14 @@ class PrismShutterVerticalCard extends HTMLElement {
               background: rgba(59, 130, 246, 0.2); color: #60a5fa;
               display: flex; align-items: center; justify-content: center;
               box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+              position: relative;
+          }
+          .icon-box ha-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 100%;
           }
           .info {
               text-align: center; width: 100%;
@@ -262,6 +270,14 @@ class PrismShutterVerticalCard extends HTMLElement {
               cursor: pointer;
               box-shadow: 0 2px 4px -1px rgba(0,0,0,0.3);
               transition: all 0.2s;
+              position: relative;
+          }
+          .control-btn ha-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 100%;
           }
           .control-btn.btn-up, .control-btn.btn-down { height: 36px; }
           .control-btn.btn-stop { height: 32px; }
