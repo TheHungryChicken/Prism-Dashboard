@@ -355,7 +355,7 @@ class PrismSidebarCard extends HTMLElement {
         this.updateForecastGrid();
     }
 
-    updateForecastGrid() {
+    async updateForecastGrid() {
         if (!this._hass) return;
         
         const weatherState = this._hass.states[this.weatherEntity];
@@ -366,12 +366,47 @@ class PrismSidebarCard extends HTMLElement {
             return;
         }
         
-        // Get forecast from attributes
-        const forecast = weatherState.attributes.forecast;
+        let forecast = [];
+        
+        // Try to get forecast from attributes (legacy method)
+        if (weatherState.attributes.forecast && weatherState.attributes.forecast.length > 0) {
+            forecast = weatherState.attributes.forecast;
+            console.log('Prism Sidebar: Using forecast from attributes');
+        } else {
+            // Try to fetch forecast via WebSocket API (new method for HA 2024+)
+            try {
+                console.log('Prism Sidebar: Fetching forecast via API for', this.weatherEntity);
+                const response = await this._hass.callWS({
+                    type: 'weather/get_forecast',
+                    entity_id: this.weatherEntity,
+                    forecast_type: 'daily'
+                });
+                
+                if (response && response.forecast && response.forecast.length > 0) {
+                    forecast = response.forecast;
+                    console.log('Prism Sidebar: Successfully fetched forecast via API:', forecast.length, 'days');
+                } else {
+                    // Try hourly forecast if daily doesn't work
+                    const hourlyResponse = await this._hass.callWS({
+                        type: 'weather/get_forecast',
+                        entity_id: this.weatherEntity,
+                        forecast_type: 'hourly'
+                    });
+                    
+                    if (hourlyResponse && hourlyResponse.forecast && hourlyResponse.forecast.length > 0) {
+                        // Convert hourly to daily (group by day)
+                        const dailyForecast = this.convertHourlyToDaily(hourlyResponse.forecast);
+                        forecast = dailyForecast;
+                        console.log('Prism Sidebar: Using hourly forecast converted to daily:', forecast.length, 'days');
+                    }
+                }
+            } catch (error) {
+                console.error('Prism Sidebar: Error fetching forecast via API:', error);
+            }
+        }
         
         if (!forecast || forecast.length === 0) {
-            console.warn('Prism Sidebar: No forecast data in weather entity', this.weatherEntity);
-            console.log('Weather state:', weatherState);
+            console.warn('Prism Sidebar: No forecast data available for', this.weatherEntity);
             return;
         }
         
@@ -409,6 +444,41 @@ class PrismSidebarCard extends HTMLElement {
                 </div>
             `;
         }).join('');
+    }
+
+    convertHourlyToDaily(hourlyForecast) {
+        if (!hourlyForecast || hourlyForecast.length === 0) return [];
+        
+        const dailyMap = new Map();
+        
+        hourlyForecast.forEach(hour => {
+            if (!hour.datetime) return;
+            const date = new Date(hour.datetime);
+            const dayKey = date.toDateString(); // Group by day
+            
+            if (!dailyMap.has(dayKey)) {
+                dailyMap.set(dayKey, {
+                    datetime: hour.datetime,
+                    condition: hour.condition,
+                    temperature: hour.temperature,
+                    templow: hour.temperature,
+                    temps: [hour.temperature]
+                });
+            } else {
+                const day = dailyMap.get(dayKey);
+                day.temps.push(hour.temperature);
+                day.temperature = Math.max(...day.temps); // High temp
+                day.templow = Math.min(...day.temps); // Low temp
+                // Use most common condition or latest
+                if (hour.condition) {
+                    day.condition = hour.condition;
+                }
+            }
+        });
+        
+        return Array.from(dailyMap.values()).sort((a, b) => 
+            new Date(a.datetime) - new Date(b.datetime)
+        );
     }
 
 
