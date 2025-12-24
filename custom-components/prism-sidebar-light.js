@@ -8,6 +8,7 @@ class PrismSidebarLightCard extends HTMLElement {
         this.currentCameraIndex = 0;
         this.cameraEntities = [];
         this.temperatureHistory = [];
+        this.temperatureHistoryWithTime = []; // Store data with timestamps
         this.historyLoading = false;
     }
 
@@ -92,6 +93,11 @@ class PrismSidebarLightCard extends HTMLElement {
     }
 
     setConfig(config) {
+        // Store previous config values to detect changes
+        const prevWeatherEntity = this.weatherEntity;
+        const prevForecastDays = this.forecastDays;
+        const prevTemperatureEntity = this.temperatureEntity;
+        
         this.config = { ...config };
         // Default entities if not provided
         this.temperatureEntity = this.config.temperature_entity || 'sensor.outdoor_temperature';
@@ -134,12 +140,32 @@ class PrismSidebarLightCard extends HTMLElement {
             this.cameraTimer = null;
         }
         
-        // Force re-render when config changes (important for forecast_days change)
-        if (this.hasRendered) {
+        // Check if important config changed that requires full re-render
+        const needsRerender = prevWeatherEntity !== this.weatherEntity || 
+                             prevForecastDays !== this.forecastDays ||
+                             prevTemperatureEntity !== this.temperatureEntity;
+        
+        // Force re-render when config changes (important for forecast_days or entity changes)
+        if (this.hasRendered && needsRerender) {
+            // Reset temperature history if entity changed
+            if (prevTemperatureEntity !== this.temperatureEntity) {
+                this.temperatureHistory = [];
+                this.historyLoading = false;
+            }
             this.hasRendered = false;
             this.render();
             this.hasRendered = true;
             this.startClock();
+            this.startCameraRotation();
+            if (this._hass) {
+                // Fetch new temperature history if entity changed
+                if (prevTemperatureEntity !== this.temperatureEntity) {
+                    this.fetchTemperatureHistory();
+                }
+                this.updateValues();
+            }
+        } else if (this.hasRendered) {
+            // Minor changes, just update values
             this.startCameraRotation();
             if (this._hass) {
                 this.updateValues();
@@ -367,7 +393,9 @@ class PrismSidebarLightCard extends HTMLElement {
         if (this.temperatureHistory && this.temperatureHistory.length > 0) {
             graphData = this.temperatureHistory;
         }
-        const graphPath = this.generateGraphPath(graphData, 280, 60);
+        const graphPaths = this.generateGraphPath(graphData, 280, 60);
+        const graphFillPath = graphPaths.fill || '';
+        const graphLinePath = graphPaths.line || '';
 
         // Get entity states for preview/display
         const cameraEntity = this.getCurrentCameraEntity();
@@ -569,8 +597,41 @@ class PrismSidebarLightCard extends HTMLElement {
                 vector-effect: non-scaling-stroke;
                 transition: all 0.3s ease;
             }
+            .graph-tooltip {
+                position: absolute;
+                background: rgba(255, 255, 255, 0.95);
+                color: #1a1a1a;
+                padding: 8px 12px;
+                border-radius: 8px;
+                font-size: 12px;
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s;
+                z-index: 1000;
+                white-space: nowrap;
+                border: 1px solid rgba(59, 130, 246, 0.3);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            }
+            .graph-tooltip.visible {
+                opacity: 1;
+            }
+            .graph-tooltip-time {
+                font-size: 10px;
+                opacity: 0.6;
+                margin-top: 2px;
+            }
+            .graph-point {
+                pointer-events: none;
+                opacity: 0;
+                transition: opacity 0.2s;
+            }
+            .graph-point.visible {
+                opacity: 1;
+            }
             .forecast-grid {
-                display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+                display: grid; 
+                grid-template-columns: repeat(auto-fit, minmax(60px, 1fr)); 
+                gap: 8px;
             }
             .forecast-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
             .day-name { font-size: 12px; color: rgba(0, 0, 0, 0.4); }
@@ -660,15 +721,40 @@ class PrismSidebarLightCard extends HTMLElement {
                                 </feMerge>
                             </filter>
                         </defs>
-                        <path d="${graphPath}" 
+                        <!-- Fill area (closed path) -->
+                        <path d="${graphFillPath}" 
                               fill="url(#grad-sidebar-light-${Date.now()})" 
+                              stroke="none" 
+                              opacity="0.9" />
+                        <!-- Line only (no fill, just the curve) -->
+                        <path d="${graphLinePath}" 
+                              fill="none" 
                               stroke="#3b82f6" 
                               stroke-width="2.5" 
                               stroke-linecap="round" 
                               stroke-linejoin="round" 
-                              filter="url(#shadow-sidebar-light-${Date.now()})"
-                              opacity="0.9" />
+                              filter="url(#shadow-sidebar-light-${Date.now()})" />
+                        <!-- Hover point indicator -->
+                        <circle class="graph-point" 
+                                id="graph-hover-point" 
+                                r="4" 
+                                fill="#3b82f6" 
+                                stroke="white" 
+                                stroke-width="2" 
+                                cx="0" 
+                                cy="0" />
+                        <!-- Transparent overlay for mouse events -->
+                        <rect id="graph-overlay" 
+                              width="280" 
+                              height="60" 
+                              fill="transparent" 
+                              style="cursor: crosshair;" />
                     </svg>
+                    <!-- Tooltip -->
+                    <div class="graph-tooltip" id="graph-tooltip">
+                        <div class="graph-tooltip-temp"></div>
+                        <div class="graph-tooltip-time"></div>
+                    </div>
                 </div>
 
                 <div class="forecast-grid">
@@ -746,6 +832,7 @@ class PrismSidebarLightCard extends HTMLElement {
         const energyGrid = this.shadowRoot?.getElementById('energy-grid');
         const energySolar = this.shadowRoot?.getElementById('energy-solar');
         const energyHome = this.shadowRoot?.getElementById('energy-home');
+        const graphOverlay = this.shadowRoot?.getElementById('graph-overlay');
 
         if (cameraBox) {
             cameraBox.addEventListener('click', () => this._handleCameraClick());
@@ -761,6 +848,12 @@ class PrismSidebarLightCard extends HTMLElement {
         }
         if (energyHome) {
             energyHome.addEventListener('click', () => this._handleEnergyClick(this.homeEntity));
+        }
+        
+        // Graph hover events
+        if (graphOverlay) {
+            graphOverlay.addEventListener('mousemove', (e) => this._handleGraphHover(e));
+            graphOverlay.addEventListener('mouseleave', () => this._handleGraphLeave());
         }
     }
 
@@ -796,6 +889,94 @@ class PrismSidebarLightCard extends HTMLElement {
         this.dispatchEvent(event);
     }
 
+    _handleGraphHover(e) {
+        if (!this.temperatureHistoryWithTime || this.temperatureHistoryWithTime.length === 0) return;
+        
+        const svg = e.currentTarget.ownerSVGElement;
+        if (!svg) return;
+        
+        // Get mouse position relative to SVG
+        const rect = svg.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const svgWidth = 280;
+        
+        // Calculate which data point is closest
+        const dataLength = this.temperatureHistoryWithTime.length;
+        const stepX = dataLength > 1 ? svgWidth / (dataLength - 1) : 0;
+        const index = Math.round(x / stepX);
+        const clampedIndex = Math.max(0, Math.min(dataLength - 1, index));
+        
+        const dataPoint = this.temperatureHistoryWithTime[clampedIndex];
+        if (!dataPoint) return;
+        
+        // Calculate Y position for the point (same logic as generateGraphPath)
+        const graphData = this.temperatureHistory;
+        const dataMax = Math.max(...graphData);
+        const dataMin = Math.min(...graphData);
+        const dataRange = dataMax - dataMin;
+        const padding = Math.max(dataRange * 0.2, 2);
+        const max = dataMax + padding;
+        const min = dataMin - padding;
+        const range = max - min;
+        
+        const normalized = (dataPoint.temp - min) / range;
+        const margin = 60 * 0.05;
+        const y = margin + (60 - 2 * margin) * (1 - normalized);
+        const pointX = clampedIndex * stepX;
+        
+        // Update point position
+        const point = this.shadowRoot?.getElementById('graph-hover-point');
+        if (point) {
+            point.setAttribute('cx', pointX);
+            point.setAttribute('cy', y);
+            point.classList.add('visible');
+        }
+        
+        // Update tooltip
+        const tooltip = this.shadowRoot?.getElementById('graph-tooltip');
+        const tooltipTemp = tooltip?.querySelector('.graph-tooltip-temp');
+        const tooltipTime = tooltip?.querySelector('.graph-tooltip-time');
+        
+        if (tooltip && tooltipTemp && tooltipTime) {
+            tooltipTemp.textContent = `${dataPoint.temp.toFixed(1)}°C`;
+            tooltipTime.textContent = dataPoint.time.toLocaleString('de-DE', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Position tooltip
+            const tooltipRect = tooltip.getBoundingClientRect();
+            let tooltipX = e.clientX - rect.left + 10;
+            let tooltipY = e.clientY - rect.top - tooltipRect.height - 10;
+            
+            // Keep tooltip in bounds
+            if (tooltipX + tooltipRect.width > rect.width) {
+                tooltipX = e.clientX - rect.left - tooltipRect.width - 10;
+            }
+            if (tooltipY < 0) {
+                tooltipY = e.clientY - rect.top + 10;
+            }
+            
+            tooltip.style.left = `${tooltipX}px`;
+            tooltip.style.top = `${tooltipY}px`;
+            tooltip.classList.add('visible');
+        }
+    }
+
+    _handleGraphLeave() {
+        const point = this.shadowRoot?.getElementById('graph-hover-point');
+        const tooltip = this.shadowRoot?.getElementById('graph-tooltip');
+        
+        if (point) {
+            point.classList.remove('visible');
+        }
+        if (tooltip) {
+            tooltip.classList.remove('visible');
+        }
+    }
+
     // Fetch temperature history data from Home Assistant
     async fetchTemperatureHistory() {
         if (this.historyLoading || !this._hass || !this.temperatureEntity) return;
@@ -823,17 +1004,21 @@ class PrismSidebarLightCard extends HTMLElement {
             });
             
             if (response && response.length > 0 && response[0].length > 0) {
-                // Extract temperature values
+                // Extract temperature values with timestamps
                 const historyData = response[0];
                 // Sample data points (e.g., one per hour) to avoid too many points
                 const sampleRate = Math.max(1, Math.floor(historyData.length / 168));
-                const sampledData = historyData
+                const sampledDataWithTime = historyData
                     .filter((_, index) => index % sampleRate === 0)
-                    .map(entry => parseFloat(entry.s))
-                    .filter(val => !isNaN(val));
+                    .map(entry => ({
+                        temp: parseFloat(entry.s),
+                        time: entry.lu ? new Date(entry.lu * 1000) : new Date()
+                    }))
+                    .filter(item => !isNaN(item.temp));
                 
-                if (sampledData.length > 0) {
-                    this.temperatureHistory = sampledData;
+                if (sampledDataWithTime.length > 0) {
+                    this.temperatureHistoryWithTime = sampledDataWithTime;
+                    this.temperatureHistory = sampledDataWithTime.map(item => item.temp);
                     // Re-render to update the graph
                     this.render();
                 }
@@ -854,7 +1039,7 @@ class PrismSidebarLightCard extends HTMLElement {
 
     // Helper to create smooth SVG path from data points with curved lines
     generateGraphPath(data, width, height) {
-        if (!data || data.length === 0) return '';
+        if (!data || data.length === 0) return { line: '', fill: '' };
         
         // Calculate range with padding for better visualization
         const dataMax = Math.max(...data);
@@ -870,7 +1055,10 @@ class PrismSidebarLightCard extends HTMLElement {
         // Ensure we have a valid range
         if (range <= 0) {
             const midY = height / 2;
-            return `M 0,${midY} L ${width},${midY} L ${width},${height} L 0,${height} Z`;
+            return { 
+                line: `M 0,${midY} L ${width},${midY}`,
+                fill: `M 0,${midY} L ${width},${midY} L ${width},${height} L 0,${height} Z`
+            };
         }
         
         const stepX = data.length > 1 ? width / (data.length - 1) : 0;
@@ -886,19 +1074,19 @@ class PrismSidebarLightCard extends HTMLElement {
             return [x, y];
         });
 
-        if (points.length === 0) return '';
+        if (points.length === 0) return { line: '', fill: '' };
         
         // Create smooth curve using Catmull-Rom spline
         const [firstX, firstY] = points[0];
-        let path = `M ${firstX},${firstY} `;
+        let linePath = `M ${firstX},${firstY} `;
         
         if (points.length === 1) {
             // Single point - just draw horizontal line
-            path += `L ${width},${firstY} `;
+            linePath += `L ${width},${firstY}`;
         } else if (points.length === 2) {
             // Two points - straight line
             const [x, y] = points[1];
-            path += `L ${x},${y} `;
+            linePath += `L ${x},${y}`;
         } else {
             // Multiple points - use smooth curves
             for (let i = 0; i < points.length - 1; i++) {
@@ -909,17 +1097,16 @@ class PrismSidebarLightCard extends HTMLElement {
                 const tension = 0.3; // Smoothness factor (0 = sharp, 1 = very smooth)
                 const d = Math.abs(x1 - x0) * tension;
                 
-                path += `C ${x0 + d},${y0} ${x1 - d},${y1} ${x1},${y1} `;
+                linePath += `C ${x0 + d},${y0} ${x1 - d},${y1} ${x1},${y1} `;
             }
         }
         
-        // Close the fill area smoothly - NO vertical lines!
+        // Create fill path (closed area under the curve)
         const [lastX, lastY] = points[points.length - 1];
-        path += `L ${lastX},${height} `; // Horizontal to bottom-right corner
-        path += `L ${firstX},${height} `; // Horizontal line along bottom
-        path += `Z`; // Close path back to start
+        let fillPath = linePath; // Start with the same curve
+        fillPath += ` L ${lastX},${height} L ${firstX},${height} Z`; // Close at bottom
         
-        return path;
+        return { line: linePath.trim(), fill: fillPath.trim() };
     }
 
     getCardSize() {
