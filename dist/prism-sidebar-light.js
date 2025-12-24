@@ -402,6 +402,12 @@ class PrismSidebarLightCard extends HTMLElement {
             
             .graph-container {
                 height: 64px; width: 100%; margin-bottom: 24px; position: relative;
+                padding: 4px 0;
+            }
+            .graph-container svg {
+                display: block;
+                width: 100%;
+                height: 100%;
             }
             .forecast-grid {
                 display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
@@ -424,6 +430,8 @@ class PrismSidebarLightCard extends HTMLElement {
                 box-shadow: inset 2px 2px 4px rgba(255,255,255,0.8), inset -1px -1px 2px rgba(0,0,0,0.1);
                 display: flex; flex-direction: column; align-items: center; justify-content: center;
                 cursor: pointer; transition: background 0.3s;
+                padding-top: 8px;
+                gap: 4px;
             }
             .energy-pill:hover { background: rgba(240, 240, 240, 0.8); }
             .pill-val { font-size: 12px; font-family: monospace; font-weight: bold; color: rgba(0, 0, 0, 0.9); }
@@ -530,17 +538,17 @@ class PrismSidebarLightCard extends HTMLElement {
             <!-- Energy Footer -->
             <div class="energy-grid">
                 <div class="energy-pill" id="energy-grid">
-                    <ha-icon icon="mdi:flash" style="width: 16px; color: rgba(0,0,0,0.3); margin-bottom: 4px;"></ha-icon>
+                    <ha-icon icon="mdi:flash" style="width: 16px; height: 16px; color: rgba(0,0,0,0.3);"></ha-icon>
                     <span class="pill-val" id="val-grid">${gridValue}</span>
                     <span class="pill-label">Grid</span>
                 </div>
                 <div class="energy-pill" id="energy-solar">
-                    <ha-icon icon="mdi:solar-power" style="width: 16px; color: rgba(0,0,0,0.3); margin-bottom: 4px;"></ha-icon>
+                    <ha-icon icon="mdi:solar-power" style="width: 16px; height: 16px; color: rgba(0,0,0,0.3);"></ha-icon>
                     <span class="pill-val" id="val-solar">${solarValue}</span>
                     <span class="pill-label">Solar</span>
                 </div>
                 <div class="energy-pill" id="energy-home">
-                    <ha-icon icon="mdi:home" style="width: 16px; color: rgba(0,0,0,0.3); margin-bottom: 4px;"></ha-icon>
+                    <ha-icon icon="mdi:home" style="width: 16px; height: 16px; color: rgba(0,0,0,0.3);"></ha-icon>
                     <span class="pill-val" id="val-home">${homeValue}</span>
                     <span class="pill-label">Home</span>
                 </div>

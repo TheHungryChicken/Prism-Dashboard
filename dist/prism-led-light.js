@@ -8,6 +8,7 @@ class PrismLedLightCard extends HTMLElement {
       this.localColor = '#ffffff';
       this.localTemp = 50; // 0-100
       this.userModeChange = false; // Track if user manually changed mode
+      this.hasRendered = false;
     }
 
     static getStubConfig() {
@@ -35,18 +36,22 @@ class PrismLedLightCard extends HTMLElement {
   
     setConfig(config) {
       // Allow preview mode without entity (for dashboard editor)
-      this.config = config;
+      this.config = { ...config };
       if (!this.config.entity) {
         // Set a default for preview
         this.config.entity = "light.example";
       }
       // Initialize preview values
-      if (!this._entity) {
+      if (!this._hass) {
         this.localBrightness = 50;
         this.localColor = '#ff9500';
         this.mode = 'color';
+        if (!this.hasRendered) {
+          this.render();
+          this.hasRendered = true;
+          this.setupListeners();
+        }
       }
-      this.render();
     }
   
     set hass(hass) {
@@ -84,7 +89,13 @@ class PrismLedLightCard extends HTMLElement {
       }
       }
       
-      this.render();
+      if (!this.hasRendered) {
+        this.render();
+        this.hasRendered = true;
+        this.setupListeners();
+      } else {
+        this.render();
+      }
     }
   
     getCardSize() {
@@ -92,8 +103,9 @@ class PrismLedLightCard extends HTMLElement {
     }
   
     connectedCallback() {
-      if (this.config) {
+      if (this.config && !this.hasRendered) {
         this.render();
+        this.hasRendered = true;
         this.setupListeners();
       }
     }
