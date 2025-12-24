@@ -313,8 +313,8 @@ class PrismSidebarLightCard extends HTMLElement {
 
         // Update weather forecast
         if (weatherState && weatherState.attributes.forecast) {
-            const forecastDays = this.forecastDays || 3;
-            const forecast = weatherState.attributes.forecast.slice(0, forecastDays);
+            const forecastCount = this.forecastDays || 3;
+            const forecast = weatherState.attributes.forecast.slice(0, forecastCount);
             forecast.forEach((day, i) => {
                 const dayNameEl = this.shadowRoot?.getElementById(`day-name-${i}`);
                 const dayTempEl = this.shadowRoot?.getElementById(`day-temp-${i}`);
@@ -360,6 +360,7 @@ class PrismSidebarLightCard extends HTMLElement {
         // Get entity states for preview/display
         const cameraEntity = this.getCurrentCameraEntity();
         const cameraState = this._hass?.states[cameraEntity];
+        const temperatureState = this._hass?.states[this.temperatureEntity];
         const weatherState = this._hass?.states[this.weatherEntity];
         const calendarState = this._hass?.states[this.calendarEntity];
         const gridState = this._hass?.states[this.gridEntity];
@@ -368,7 +369,7 @@ class PrismSidebarLightCard extends HTMLElement {
 
         const cameraImage = cameraState?.attributes?.entity_picture || 'https://images.unsplash.com/photo-1558435186-d31d1eb6fa3c?q=80&w=600&auto=format&fit=crop';
         const cameraName = cameraState?.attributes?.friendly_name || cameraEntity.split('.')[1] || 'Camera';
-        const currentTemp = weatherState?.attributes?.temperature || '0';
+        const currentTemp = temperatureState?.state || '0';
         const calendarTitle = calendarState?.attributes?.message || 'Keine Termine';
         const calendarSub = calendarState?.attributes?.all_day ? 'Ganztägig' : 
                            (calendarState?.attributes?.start_time ? 
@@ -814,11 +815,11 @@ class PrismSidebarLightCard extends HTMLElement {
         }
     }
 
-    // Helper to create smooth SVG path from data points (similar to mini-graph-card)
+    // Helper to create smooth SVG path from data points (mini-graph-card style)
     generateGraphPath(data, width, height) {
         if (!data || data.length === 0) return '';
         
-        // Calculate range with padding for better visualization (like mini-graph-card)
+        // Calculate range with padding for better visualization
         const dataMax = Math.max(...data);
         const dataMin = Math.min(...data);
         const dataRange = dataMax - dataMin;
@@ -831,8 +832,8 @@ class PrismSidebarLightCard extends HTMLElement {
         
         // Ensure we have a valid range
         if (range <= 0) {
-            // Fallback: create a flat line in the middle
-            return `M 0,${height} L 0,${height/2} L ${width},${height/2} L ${width},${height} Z`;
+            const midY = height / 2;
+            return `M 0,${height} L 0,${midY} L ${width},${midY} L ${width},${height} Z`;
         }
         
         const stepX = data.length > 1 ? width / (data.length - 1) : 0;
@@ -848,27 +849,24 @@ class PrismSidebarLightCard extends HTMLElement {
             return [x, y];
         });
 
-        // Start path from bottom-left (like mini-graph-card: no vertical sides)
-        let path = `M 0,${height} `;
+        // Build path: ONLY the line and fill, NO vertical sides
+        if (points.length === 0) return '';
         
-        // Horizontal line to first data point's x position, then up to first point
-        if (points.length > 0) {
-            const [firstX, firstY] = points[0];
-            path += `L ${firstX},${height} L ${firstX},${firstY} `;
-        }
+        // Start from first point
+        const [firstX, firstY] = points[0];
+        let path = `M ${firstX},${firstY} `;
         
-        // Draw smooth lines through all points (similar to mini-graph-card)
+        // Draw line through all points
         for (let i = 1; i < points.length; i++) {
             const [x, y] = points[i];
             path += `L ${x},${y} `;
         }
-
-        // Close shape: down to bottom at last point's x, then horizontal line back to start
-        if (points.length > 0) {
-            const [lastX, lastY] = points[points.length - 1];
-            path += `L ${lastX},${height} `; // Down from last point
-        }
-        path += `L 0,${height} Z`; // Horizontal line back to start (no vertical line on left)
+        
+        // Close the fill area by going to bottom-right, then bottom-left, then back up
+        const [lastX] = points[points.length - 1];
+        path += `L ${lastX},${height} `; // Down to bottom at last X
+        path += `L ${firstX},${height} `; // Horizontal line to first X at bottom
+        path += `Z`; // Close path back to start
         
         return path;
     }
