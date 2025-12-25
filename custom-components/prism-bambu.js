@@ -328,10 +328,14 @@ class PrismBambuCard extends HTMLElement {
     const progress = this.getEntityValue('print_progress');
     const stateStr = this.getEntityState('print_status') || this.getEntityState('stage') || 'unavailable';
     
-    // Determine if printer is actively printing
-    const isPrinting = ['printing', 'prepare', 'running'].includes(stateStr.toLowerCase());
-    const isPaused = ['paused', 'pause'].includes(stateStr.toLowerCase());
-    const isIdle = ['idle', 'finish', 'finished', 'failed', 'offline', 'unavailable', 'unknown'].includes(stateStr.toLowerCase());
+    // Debug: Log the current status
+    console.log('Prism Bambu: Current status:', stateStr, 'Progress:', progress);
+    
+    // Determine if printer is actively printing (support German status names too)
+    const statusLower = stateStr.toLowerCase();
+    const isPrinting = ['printing', 'prepare', 'running', 'druckt', 'vorbereiten'].includes(statusLower);
+    const isPaused = ['paused', 'pause', 'pausiert'].includes(statusLower);
+    const isIdle = !isPrinting && !isPaused; // Everything else is idle
     
     // Get remaining time - format it nicely (only if printing)
     const remainingTimeEntity = this._deviceEntities['remaining_time'];
@@ -376,10 +380,14 @@ class PrismBambuCard extends HTMLElement {
     }
     
     // Chamber light state
-    const chamberLightEntity = this._deviceEntities['chamber_light'];
-    const chamberLightState = chamberLightEntity?.entity_id ? 
-      this._hass.states[chamberLightEntity.entity_id]?.state : null;
+    const chamberLightEntityInfo = this._deviceEntities['chamber_light'];
+    const chamberLightEntityId = chamberLightEntityInfo?.entity_id;
+    const chamberLightState = chamberLightEntityId ? 
+      this._hass.states[chamberLightEntityId]?.state : null;
     const isLightOn = chamberLightState === 'on';
+    
+    // Debug: Log light entity
+    console.log('Prism Bambu: Chamber light entity:', chamberLightEntityId, 'State:', chamberLightState);
     
     // Get printer name from device
     const deviceId = this.config.printer;
@@ -403,21 +411,30 @@ class PrismBambuCard extends HTMLElement {
     let foundAnyAms = false;
     const trayEntities = [];
     
+    // Helper function to check if entity is a tray/slot entity
+    const isTrayEntity = (entityInfo, entityId) => {
+      // Check translation_key for tray_1, tray_2, etc. (ha-bambulab style)
+      if (entityInfo.translation_key && /^tray_\d+$/.test(entityInfo.translation_key)) {
+        return true;
+      }
+      // Check entity_id for slot or tray (some integrations use slot instead of tray)
+      if (entityId.includes('_slot_') || entityId.includes('_tray_')) {
+        return true;
+      }
+      return false;
+    };
+    
     // Method 1: Use manually configured AMS device
     if (this.config.ams_device) {
       const amsDeviceId = this.config.ams_device;
       for (const entityId in this._hass.entities) {
         const entityInfo = this._hass.entities[entityId];
-        if (entityInfo.device_id === amsDeviceId) {
-          // Check if this is a tray entity (has "tray" in translation_key or entity_id)
-          if ((entityInfo.translation_key && entityInfo.translation_key.includes('tray')) ||
-              entityId.includes('tray')) {
-            trayEntities.push({
-              entityId,
-              translationKey: entityInfo.translation_key || entityId,
-              ...entityInfo
-            });
-          }
+        if (entityInfo.device_id === amsDeviceId && isTrayEntity(entityInfo, entityId)) {
+          trayEntities.push({
+            entityId,
+            translationKey: entityInfo.translation_key || entityId,
+            ...entityInfo
+          });
         }
       }
     }
@@ -431,31 +448,36 @@ class PrismBambuCard extends HTMLElement {
       for (const connectedDevice of connectedDevices) {
         for (const entityId in this._hass.entities) {
           const entityInfo = this._hass.entities[entityId];
-          if (entityInfo.device_id === connectedDevice.id) {
-            // Check if this is a tray entity
-            if ((entityInfo.translation_key && entityInfo.translation_key.includes('tray')) ||
-                entityId.includes('tray')) {
-              trayEntities.push({
-                entityId,
-                translationKey: entityInfo.translation_key || entityId,
-                ...entityInfo
-              });
-            }
+          if (entityInfo.device_id === connectedDevice.id && isTrayEntity(entityInfo, entityId)) {
+            trayEntities.push({
+              entityId,
+              translationKey: entityInfo.translation_key || entityId,
+              ...entityInfo
+            });
           }
         }
       }
     }
     
-    // Sort tray entities by their tray number
+    // Sort tray entities by their slot/tray number
     trayEntities.sort((a, b) => {
-      const numA = parseInt(a.translationKey.match(/\d+/)?.[0] || '0');
-      const numB = parseInt(b.translationKey.match(/\d+/)?.[0] || '0');
-      return numA - numB;
+      // Extract number from translation_key (tray_1) or entity_id (ams_1_slot_1)
+      const getNum = (e) => {
+        const tkMatch = e.translationKey?.match(/(\d+)$/);
+        if (tkMatch) return parseInt(tkMatch[1]);
+        const idMatch = e.entityId?.match(/slot_(\d+)|tray_(\d+)/);
+        if (idMatch) return parseInt(idMatch[1] || idMatch[2]);
+        return 0;
+      };
+      return getNum(a) - getNum(b);
     });
     
     // Debug: Log found AMS tray entities
     if (trayEntities.length > 0) {
       console.log('Prism Bambu: Found AMS tray entities:', trayEntities.map(e => e.entityId));
+      // Log first entity's full state for debugging
+      const firstState = this._hass.states[trayEntities[0].entityId];
+      console.log('Prism Bambu: First tray full state:', firstState);
     }
     
     // Build AMS data from found tray entities
@@ -467,22 +489,36 @@ class PrismBambuCard extends HTMLElement {
         const trayState = this._hass.states[trayEntity.entityId];
         const attr = trayState?.attributes || {};
         
-        const type = attr.type || trayState?.state || '';
-        let color = attr.color || '#666666';
-        if (color && !color.startsWith('#') && !color.startsWith('rgb')) {
+        // ha-bambulab stores: name (type), color, remain, active/in_use, empty
+        const type = attr.name || attr.type || attr.tray_type || trayState?.state || '';
+        let color = attr.color || attr.tray_color || '#666666';
+        
+        // Ensure color has # prefix (ha-bambulab stores without #)
+        if (color && typeof color === 'string' && !color.startsWith('#') && !color.startsWith('rgb')) {
           color = '#' + color;
         }
-        const remaining = parseFloat(attr.remain || attr.remaining || 100);
-        const active = attr.active || false;
-        const empty = !type || type === 'empty' || type === 'unavailable' || type === 'unknown';
+        
+        // Get remaining percentage
+        const remaining = parseFloat(attr.remain ?? attr.remaining ?? 0);
+        
+        // Check if active (ha-bambulab uses 'active' or 'in_use')
+        const active = attr.active === true || attr.in_use === true;
+        
+        // Check if empty
+        const isEmpty = attr.empty === true || 
+                       !type || 
+                       type.toLowerCase() === 'empty' || 
+                       type === 'unavailable' || 
+                       type === 'unknown' || 
+                       type === '-';
         
         amsData.push({
           id: i + 1,
-          type: empty ? '' : type,
-          color: empty ? '#666666' : color,
-          remaining: empty ? 0 : remaining,
+          type: isEmpty ? '' : type.toUpperCase(),
+          color: isEmpty ? '#666666' : color,
+          remaining: isEmpty ? 0 : Math.round(remaining),
           active,
-          empty
+          empty: isEmpty
         });
       } else if (i < 4) {
         // Fill empty slots up to 4
@@ -497,13 +533,17 @@ class PrismBambuCard extends HTMLElement {
       }
     }
     
-    // If no AMS data found at all, show preview data
+    // Debug: Log final AMS data
+    console.log('Prism Bambu: Final AMS data:', amsData);
+    
+    // If no AMS data found at all, show placeholder (not preview data!)
     if (!foundAnyAms) {
+      console.log('Prism Bambu: No AMS found, showing empty slots');
       amsData = [
-        { id: 1, type: 'PLA', color: '#FF4444', remaining: 85, active: false },
-        { id: 2, type: 'PETG', color: '#4488FF', remaining: 42, active: true },
-        { id: 3, type: 'ABS', color: '#111111', remaining: 12, active: false },
-        { id: 4, type: 'TPU', color: '#FFFFFF', remaining: 0, active: false, empty: true }
+        { id: 1, type: '', color: '#666666', remaining: 0, active: false, empty: true },
+        { id: 2, type: '', color: '#666666', remaining: 0, active: false, empty: true },
+        { id: 3, type: '', color: '#666666', remaining: 0, active: false, empty: true },
+        { id: 4, type: '', color: '#666666', remaining: 0, active: false, empty: true }
       ];
     }
 
@@ -530,7 +570,7 @@ class PrismBambuCard extends HTMLElement {
       isPaused,
       isIdle,
       isLightOn,
-      chamberLightEntity: chamberLightEntity?.entity_id
+      chamberLightEntity: chamberLightEntityId
     };
   }
 
