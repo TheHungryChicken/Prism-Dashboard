@@ -1,18 +1,24 @@
 // Bambu Lab Manufacturer and Models for device filtering
+// Synchronized with ha-bambulab-cards repository (https://github.com/greghesp/ha-bambulab-cards)
 const BAMBU_MANUFACTURER = 'Bambu Lab';
 const BAMBU_PRINTER_MODELS = [
+  // A-Series
   'A1', 'A1 MINI', 'A1 Mini', 'A1MINI', 'A1Mini', 'A1mini',
+  // H-Series (newer desktop printers)
   'H2C', 'H2D', 'H2DPRO', 'H2S',
+  // P-Series
   'P1P', 'P1S', 'P2S',
+  // X-Series (professional)
   'X1', 'X1C', 'X1E'
 ];
 
-// AMS Models - includes all AMS variants
+// AMS Models - synchronized with ha-bambulab-cards
 const BAMBU_AMS_MODELS = [
-  'AMS', 'AMS Lite', 'AMS Hub',
-  'AMS 2', 'AMS 2 Pro', 'AMS2', 'AMS2 Pro',
-  'AMS Pro', 'AMS Lite 2',
-  'External Spool', 'ExternalSpool'
+  'AMS',           // Original AMS (4 slots)
+  'AMS Lite',      // AMS Lite (4 slots, for A1)
+  'AMS 2 Pro',     // AMS 2 Pro (newer, for H2D etc.)
+  'AMS HT',        // AMS High Temperature
+  'External Spool' // External spool holder
 ];
 
 // Entity keys to look for (based on translation_key from ha-bambulab)
