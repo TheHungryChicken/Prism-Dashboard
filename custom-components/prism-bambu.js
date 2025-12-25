@@ -20,9 +20,9 @@ class PrismBambuCard extends HTMLElement {
       schema: [
         {
           name: 'entity',
-          label: 'Printer entity (e.g. sensor.x1c_1)',
+          label: 'Printer entity (Go to: Devices → X1C_1 → Find sensor.x1c_1 or sensor.x1c_1_print_status)',
           required: true,
-          selector: { entity: {} }
+          selector: { entity: { domain: ['sensor', 'binary_sensor'] } }
         },
         {
           name: 'name',
@@ -51,7 +51,7 @@ class PrismBambuCard extends HTMLElement {
         },
         {
           name: 'image',
-          label: 'Printer image path (optional)',
+          label: 'Printer image path (optional, supports .png and .jpg)',
           selector: { text: {} }
         }
       ]
@@ -157,11 +157,18 @@ class PrismBambuCard extends HTMLElement {
 
     const entityId = this.config.entity;
     const state = this._hass.states[entityId];
-    const stateStr = state ? state.state : 'unavailable';
-    const attributes = state ? state.attributes : {};
+    
+    // Show helpful error if entity not found
+    if (!state) {
+      console.warn(`Prism Bambu: Entity '${entityId}' not found. Go to: Devices → X1C_1 → Find entity like 'sensor.x1c_1' or 'sensor.x1c_1_print_status'`);
+      return this.getPreviewData();
+    }
+    
+    const stateStr = state.state;
+    const attributes = state.attributes || {};
     
     // Read ALL data from printer entity attributes (like official bambu-lab cards)
-    // Entity name format: X1C_1, bambu_lab_printer, etc.
+    // Entity name format: sensor.x1c_1, sensor.x1c_1_print_status, etc.
     
     const progress = parseFloat(attributes.print_progress || attributes.progress) || 0;
     const printTimeLeft = attributes.remaining_time || attributes.print_time_left || '0m';
@@ -550,7 +557,7 @@ class PrismBambuCard extends HTMLElement {
             object-fit: contain;
             filter: drop-shadow(0 0 30px rgba(59,130,246,0.15)) brightness(1.05);
             z-index: 10;
-            padding: 32px;
+            padding: 16px;
             box-sizing: border-box;
         }
         .camera-feed {
@@ -797,7 +804,7 @@ class PrismBambuCard extends HTMLElement {
                 <div class="view-toggle">
                     <ha-icon icon="${data.cameraEntity ? 'mdi:video' : 'mdi:image'}"></ha-icon>
                 </div>
-                <img src="${data.printerImg}" class="printer-img" onerror="this.onerror=null; if(this.src.endsWith('.png')) { this.src=this.src.replace('.png', '.jpg'); } else if(this.src.endsWith('.jpg')) { this.src=this.src.replace('.jpg', '.png'); } else { this.style.display='none'; this.nextElementSibling.style.display='flex'; }" />
+                <img src="${data.printerImg}" class="printer-img" onerror="if(!this.dataset.errorHandled){this.dataset.errorHandled='true'; if(this.src.endsWith('.png')){this.src=this.src.replace('.png','.jpg');}else if(this.src.endsWith('.jpg')){this.src=this.src.replace('.jpg','.png');}else{this.style.display='none';this.nextElementSibling.style.display='flex';}}" />
                 <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; color: rgba(255,255,255,0.3); font-size: 14px;">
                   <ha-icon icon="mdi:printer-3d" style="width: 64px; height: 64px;"></ha-icon>
                 </div>
