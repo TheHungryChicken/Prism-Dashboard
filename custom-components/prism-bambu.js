@@ -28,6 +28,7 @@ class PrismBambuCard extends HTMLElement {
     this.showCamera = false;
     this.hasRendered = false;
     this._deviceEntities = {}; // Cache for device entities
+    this._lastStatus = null; // Track status for re-render decisions
   }
 
   static getStubConfig() {
@@ -141,6 +142,7 @@ class PrismBambuCard extends HTMLElement {
 
   set hass(hass) {
     const firstTime = hass && !this._hass;
+    const oldStatus = this._lastStatus;
     this._hass = hass;
     
     // Cache device entities on first hass assignment or if empty (only if printer is configured)
@@ -149,12 +151,18 @@ class PrismBambuCard extends HTMLElement {
       console.log('Prism Bambu: Found device entities:', Object.keys(this._deviceEntities));
     }
     
-    if (!this.hasRendered) {
+    // Get current status to detect changes
+    const data = this.getPrinterData();
+    const newStatus = `${data.isIdle}-${data.isPrinting}-${data.isPaused}-${!!data.chamberLightEntity}-${!!data.cameraEntity}`;
+    
+    // Re-render if: first time, status changed, or never rendered
+    if (!this.hasRendered || firstTime || oldStatus !== newStatus) {
+      this._lastStatus = newStatus;
       this.render();
       this.hasRendered = true;
       this.setupListeners();
     } else {
-      // Only update values, don't re-render entire HTML
+      // Only update dynamic values
       this.updateValues();
     }
   }
@@ -492,32 +500,51 @@ class PrismBambuCard extends HTMLElement {
         const trayState = this._hass.states[trayEntity.entityId];
         const attr = trayState?.attributes || {};
         
-        // ha-bambulab stores: name (type), color, remain, active/in_use, empty
-        const type = attr.name || attr.type || attr.tray_type || trayState?.state || '';
-        let color = attr.color || attr.tray_color || '#666666';
-        
-        // Ensure color has # prefix (ha-bambulab stores without #)
-        if (color && typeof color === 'string' && !color.startsWith('#') && !color.startsWith('rgb')) {
-          color = '#' + color;
+        // Debug first slot attributes
+        if (i === 0) {
+          console.log('Prism Bambu: Slot 1 attributes:', JSON.stringify(attr));
         }
         
-        // Get remaining percentage
-        const remaining = parseFloat(attr.remain ?? attr.remaining ?? 0);
+        // Get filament type - from state (e.g. "Bambu TPU for AMS") or attributes
+        let type = trayState?.state || attr.name || attr.type || '';
+        // Extract short type name (e.g. "Bambu TPU for AMS" -> "TPU", "PLA Basic" -> "PLA")
+        const typeMatch = type.match(/\b(PLA|PETG|ABS|TPU|ASA|PA|PC|PVA|HIPS|PP)\b/i);
+        if (typeMatch) {
+          type = typeMatch[1].toUpperCase();
+        } else if (type.length > 10) {
+          // Shorten long names
+          type = type.substring(0, 8);
+        }
         
-        // Check if active (ha-bambulab uses 'active' or 'in_use')
+        // Get color - may be 8 chars with alpha (#RRGGBBAA), convert to 6 (#RRGGBB)
+        let color = attr.color || attr.tray_color || '#666666';
+        if (color && typeof color === 'string') {
+          // Add # if missing
+          if (!color.startsWith('#') && !color.startsWith('rgb')) {
+            color = '#' + color;
+          }
+          // Remove alpha channel if present (8 char -> 6 char)
+          if (color.length === 9) {
+            color = color.substring(0, 7);
+          }
+        }
+        
+        // Get remaining percentage - try multiple attribute names
+        const remaining = parseFloat(attr.remain ?? attr.remaining ?? attr.k ?? 100);
+        
+        // Check if active
         const active = attr.active === true || attr.in_use === true;
         
         // Check if empty
         const isEmpty = attr.empty === true || 
-                       !type || 
-                       type.toLowerCase() === 'empty' || 
-                       type === 'unavailable' || 
-                       type === 'unknown' || 
-                       type === '-';
+                       !trayState?.state || 
+                       trayState?.state.toLowerCase() === 'empty' || 
+                       trayState?.state === 'unavailable' || 
+                       trayState?.state === 'unknown';
         
         amsData.push({
           id: i + 1,
-          type: isEmpty ? '' : type.toUpperCase(),
+          type: isEmpty ? '' : type,
           color: isEmpty ? '#666666' : color,
           remaining: isEmpty ? 0 : Math.round(remaining),
           active,
