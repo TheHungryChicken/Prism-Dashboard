@@ -7,9 +7,12 @@ const BAMBU_PRINTER_MODELS = [
   'X1', 'X1C', 'X1E'
 ];
 
-// AMS Models
+// AMS Models - includes all AMS variants
 const BAMBU_AMS_MODELS = [
-  'AMS', 'AMS Lite', 'AMS Hub'
+  'AMS', 'AMS Lite', 'AMS Hub',
+  'AMS 2', 'AMS 2 Pro', 'AMS2', 'AMS2 Pro',
+  'AMS Pro', 'AMS Lite 2',
+  'External Spool', 'ExternalSpool'
 ];
 
 // Entity keys to look for (based on translation_key from ha-bambulab)
