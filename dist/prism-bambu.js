@@ -193,7 +193,7 @@ class PrismBambuCard extends HTMLElement {
     
     // Get current status to detect changes
     const data = this.getPrinterData();
-    const newStatus = `${data.isIdle}-${data.isPrinting}-${data.isPaused}-${!!data.chamberLightEntity}-${!!data.cameraEntity}`;
+    const newStatus = `${data.isIdle}-${data.isPrinting}-${data.isPaused}-${!!data.chamberLightEntity}-${!!data.cameraEntity}-${!!data.powerSwitch}-${data.isPowerOn}`;
     
     // Re-render if: first time, status changed, or never rendered
     if (!this.hasRendered || firstTime || oldStatus !== newStatus) {
