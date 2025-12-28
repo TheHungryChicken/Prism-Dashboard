@@ -112,35 +112,132 @@ class PrismBambuCard extends HTMLElement {
           label: 'Cover image entity (optional - auto-detected if not set)',
           selector: { entity: { domain: 'image' } }
         },
+        // Custom entities section
         {
-          name: 'custom_humidity',
-          label: 'Custom humidity sensor (optional)',
-          selector: { entity: { domain: 'sensor', device_class: 'humidity' } }
+          type: 'expandable',
+          name: '',
+          title: 'Custom Entities',
+          schema: [
+            {
+              name: 'power_switch',
+              label: 'Power switch entity',
+              selector: { entity: { domain: 'switch' } }
+            },
+            {
+              name: 'custom_light',
+              label: 'Custom light entity (overrides auto-detected)',
+              selector: { entity: { domain: 'light' } }
+            },
+            {
+              name: 'custom_light_name',
+              label: 'Custom light label (default: "Light")',
+              selector: { text: {} }
+            },
+            {
+              name: 'custom_humidity',
+              label: 'Custom humidity sensor',
+              selector: { entity: { domain: 'sensor', device_class: 'humidity' } }
+            },
+            {
+              name: 'custom_humidity_name',
+              label: 'Custom humidity label (default: "Humid")',
+              selector: { text: {} }
+            },
+            {
+              name: 'custom_temperature',
+              label: 'Custom temperature sensor',
+              selector: { entity: { domain: 'sensor', device_class: 'temperature' } }
+            },
+            {
+              name: 'custom_temperature_name',
+              label: 'Custom temperature label (default: "Custom")',
+              selector: { text: {} }
+            },
+            {
+              name: 'custom_fan',
+              label: 'Custom fan sensor',
+              selector: { entity: { domain: 'sensor' } }
+            },
+            {
+              name: 'custom_fan_name',
+              label: 'Custom fan label (default: "Custom")',
+              selector: { text: {} }
+            }
+          ]
         },
+        // Visibility toggles section
         {
-          name: 'custom_temperature',
-          label: 'Custom temperature sensor (optional)',
-          selector: { entity: { domain: 'sensor', device_class: 'temperature' } }
-        },
-        {
-          name: 'custom_light',
-          label: 'Custom light entity (optional - overrides auto-detected)',
-          selector: { entity: { domain: 'light' } }
-        },
-        {
-          name: 'custom_fan',
-          label: 'Custom fan sensor (optional - shows additional fan speed)',
-          selector: { entity: { domain: 'sensor' } }
-        },
-        {
-          name: 'custom_fan_name',
-          label: 'Custom fan label (optional - default: "Custom")',
-          selector: { text: {} }
-        },
-        {
-          name: 'power_switch',
-          label: 'Power switch (optional)',
-          selector: { entity: { domain: 'switch' } }
+          type: 'expandable',
+          name: '',
+          title: 'Display Options',
+          schema: [
+            {
+              name: 'show_part_fan',
+              label: 'Show Part Fan',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_aux_fan',
+              label: 'Show Aux Fan',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_chamber_fan',
+              label: 'Show Chamber Fan (if available)',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_heatbreak_fan',
+              label: 'Show Heatbreak Fan (if available)',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_nozzle_temp',
+              label: 'Show Nozzle Temperature',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_bed_temp',
+              label: 'Show Bed Temperature',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_chamber_temp',
+              label: 'Show Chamber Temperature',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_humidity',
+              label: 'Show Humidity (if configured)',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_custom_temp',
+              label: 'Show Custom Temperature (if configured)',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_custom_fan',
+              label: 'Show Custom Fan (if configured)',
+              default: true,
+              selector: { boolean: {} }
+            },
+            {
+              name: 'show_ams_info',
+              label: 'Show AMS Temperature & Humidity (if available)',
+              default: true,
+              selector: { boolean: {} }
+            }
+          ]
         }
       ]
     };
@@ -310,6 +407,16 @@ class PrismBambuCard extends HTMLElement {
     }
     if (data.customFanSpeed !== null) {
       updatePill('custom-fan', `${Math.round(data.customFanSpeed)}%`);
+    }
+    
+    // Update AMS info pills
+    if (data.amsTemperature !== null) {
+      const amsTempPill = this.shadowRoot.querySelector('[data-pill="ams-temp"] .ams-pill-content .ams-pill-value');
+      if (amsTempPill) amsTempPill.textContent = `${Math.round(data.amsTemperature)}°C`;
+    }
+    if (data.amsHumidity !== null) {
+      const amsHumidPill = this.shadowRoot.querySelector('[data-pill="ams-humidity"] .ams-pill-content .ams-pill-value');
+      if (amsHumidPill) amsHumidPill.textContent = `${Math.round(data.amsHumidity)}%`;
     }
     
     // Update temperatures
@@ -793,10 +900,12 @@ class PrismBambuCard extends HTMLElement {
     const customHumidity = this.config.custom_humidity;
     const customHumidityState = customHumidity ? this._hass.states[customHumidity] : null;
     const humidity = customHumidityState ? parseFloat(customHumidityState.state) || 0 : null;
+    const humidityName = this.config.custom_humidity_name || 'Humid';
     
     const customTemperature = this.config.custom_temperature;
     const customTemperatureState = customTemperature ? this._hass.states[customTemperature] : null;
     const customTemp = customTemperatureState ? parseFloat(customTemperatureState.state) || 0 : null;
+    const customTempName = this.config.custom_temperature_name || 'Custom';
     
     const powerSwitch = this.config.power_switch;
     const powerSwitchState = powerSwitch ? this._hass.states[powerSwitch] : null;
@@ -807,6 +916,9 @@ class PrismBambuCard extends HTMLElement {
     const customFanState = customFan ? this._hass.states[customFan] : null;
     const customFanSpeed = customFanState ? parseFloat(customFanState.state) || 0 : null;
     const customFanName = this.config.custom_fan_name || 'Custom';
+    
+    // Custom light name
+    const customLightName = this.config.custom_light_name || 'Light';
     
     // Debug: Log light entity
     PrismBambuCard.log('Chamber light entity:', chamberLightEntityId, 'State:', chamberLightState);
@@ -1102,6 +1214,44 @@ class PrismBambuCard extends HTMLElement {
       PrismBambuCard.log('No AMS configured or no data, hiding AMS section');
       amsData = []; // Empty = hide section
     }
+    
+    // Get AMS temperature and humidity (from AMS device entities)
+    let amsTemperature = null;
+    let amsHumidity = null;
+    
+    if (this.config.ams_device) {
+      const amsDeviceId = this.config.ams_device;
+      
+      // Look for temperature and humidity sensors belonging to the AMS device
+      for (const entityId in this._hass.entities) {
+        const entityInfo = this._hass.entities[entityId];
+        if (entityInfo.device_id === amsDeviceId) {
+          const state = this._hass.states[entityId];
+          const entityIdLower = entityId.toLowerCase();
+          const translationKey = entityInfo.translation_key?.toLowerCase() || '';
+          
+          // Check for temperature sensor
+          if ((entityIdLower.includes('temperature') || translationKey.includes('temperature') || 
+               entityIdLower.includes('temp') || translationKey.includes('temp')) &&
+              !entityIdLower.includes('nozzle') && !entityIdLower.includes('bed')) {
+            const tempValue = parseFloat(state?.state);
+            if (!isNaN(tempValue) && state?.state !== 'unavailable' && state?.state !== 'unknown') {
+              amsTemperature = tempValue;
+              PrismBambuCard.log('Found AMS temperature:', amsTemperature, 'from', entityId);
+            }
+          }
+          
+          // Check for humidity sensor
+          if (entityIdLower.includes('humidity') || translationKey.includes('humidity')) {
+            const humValue = parseFloat(state?.state);
+            if (!isNaN(humValue) && state?.state !== 'unavailable' && state?.state !== 'unknown') {
+              amsHumidity = humValue;
+              PrismBambuCard.log('Found AMS humidity:', amsHumidity, 'from', entityId);
+            }
+          }
+        }
+      }
+    }
 
     const returnData = {
       stateStr,
@@ -1135,11 +1285,29 @@ class PrismBambuCard extends HTMLElement {
       chamberLightEntity: chamberLightEntityId,
       // Custom sensors
       humidity,
+      humidityName,
       customTemp,
+      customTempName,
       customFanSpeed,
       customFanName,
+      customLightName,
       powerSwitch,
-      isPowerOn
+      isPowerOn,
+      // AMS sensors
+      amsTemperature,
+      amsHumidity,
+      // Visibility settings (default to true if not set)
+      showPartFan: this.config.show_part_fan !== false,
+      showAuxFan: this.config.show_aux_fan !== false,
+      showChamberFan: this.config.show_chamber_fan !== false,
+      showHeatbreakFan: this.config.show_heatbreak_fan !== false,
+      showNozzleTemp: this.config.show_nozzle_temp !== false,
+      showBedTemp: this.config.show_bed_temp !== false,
+      showChamberTemp: this.config.show_chamber_temp !== false,
+      showHumidity: this.config.show_humidity !== false,
+      showCustomTemp: this.config.show_custom_temp !== false,
+      showCustomFan: this.config.show_custom_fan !== false,
+      showAmsInfo: this.config.show_ams_info !== false
     };
     
     // Debug: Log key data for icons and status
@@ -1187,11 +1355,29 @@ class PrismBambuCard extends HTMLElement {
       chamberLightEntity: null,
       // Custom sensors
       humidity: null,
+      humidityName: 'Humid',
       customTemp: null,
+      customTempName: 'Custom',
       customFanSpeed: null,
       customFanName: 'Custom',
+      customLightName: 'Light',
       powerSwitch: null,
-      isPowerOn: true
+      isPowerOn: true,
+      // AMS sensors
+      amsTemperature: 25,
+      amsHumidity: 45,
+      // Visibility settings (all true for preview)
+      showPartFan: true,
+      showAuxFan: true,
+      showChamberFan: true,
+      showHeatbreakFan: true,
+      showNozzleTemp: true,
+      showBedTemp: true,
+      showChamberTemp: true,
+      showHumidity: true,
+      showCustomTemp: true,
+      showCustomFan: true,
+      showAmsInfo: true
     };
   }
 
@@ -1372,6 +1558,69 @@ class PrismBambuCard extends HTMLElement {
         .ams-grid.hidden {
             display: none;
         }
+        
+        /* AMS Info Pills (Temperature & Humidity) - same style as overlay-pills */
+        .ams-info-bar {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            margin-top: -8px;
+        }
+        .ams-info-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            padding: 6px 12px 6px 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .ams-info-pill .ams-pill-icon {
+            width: 24px;
+            height: 24px;
+            min-width: 24px;
+            min-height: 24px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .ams-info-pill .ams-pill-icon ha-icon {
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .ams-info-pill .ams-pill-content {
+            display: flex;
+            flex-direction: column;
+            line-height: 1;
+        }
+        .ams-info-pill .ams-pill-value {
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        .ams-info-pill .ams-pill-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .ams-info-pill.temp .ams-pill-icon ha-icon {
+            color: #fb923c;
+        }
+        .ams-info-pill.humidity .ams-pill-icon ha-icon {
+            color: #60a5fa;
+        }
+        
         .ams-slot {
             position: relative;
             aspect-ratio: 3/4;
@@ -2077,6 +2326,29 @@ class PrismBambuCard extends HTMLElement {
             `).join('')}
         </div>
         
+        ${data.showAmsInfo && (data.amsTemperature !== null || data.amsHumidity !== null) ? `
+        <div class="ams-info-bar">
+            ${data.amsTemperature !== null ? `
+            <div class="ams-info-pill temp" data-pill="ams-temp">
+                <div class="ams-pill-icon"><ha-icon icon="mdi:thermometer"></ha-icon></div>
+                <div class="ams-pill-content">
+                    <span class="ams-pill-value">${Math.round(data.amsTemperature)}°C</span>
+                    <span class="ams-pill-label">AMS</span>
+                </div>
+            </div>
+            ` : ''}
+            ${data.amsHumidity !== null ? `
+            <div class="ams-info-pill humidity" data-pill="ams-humidity">
+                <div class="ams-pill-icon"><ha-icon icon="mdi:water-percent"></ha-icon></div>
+                <div class="ams-pill-content">
+                    <span class="ams-pill-value">${Math.round(data.amsHumidity)}%</span>
+                    <span class="ams-pill-label">AMS</span>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+        ` : ''}
+        
         <!-- Filament Info Popup -->
         <div class="filament-popup-overlay" style="display: none;">
             <div class="filament-popup">
@@ -2141,6 +2413,7 @@ class PrismBambuCard extends HTMLElement {
                 ` : ''}
                 
                 <div class="overlay-left">
+                    ${data.showPartFan ? `
                     <div class="overlay-pill" data-pill="part-fan">
                         <div class="pill-icon-container"><ha-icon icon="mdi:fan"></ha-icon></div>
                         <div class="pill-content">
@@ -2148,6 +2421,8 @@ class PrismBambuCard extends HTMLElement {
                             <span class="pill-label">Part</span>
                         </div>
                     </div>
+                    ` : ''}
+                    ${data.showAuxFan ? `
                     <div class="overlay-pill" data-pill="aux-fan">
                         <div class="pill-icon-container"><ha-icon icon="mdi:weather-windy"></ha-icon></div>
                         <div class="pill-content">
@@ -2155,7 +2430,8 @@ class PrismBambuCard extends HTMLElement {
                             <span class="pill-label">Aux</span>
                         </div>
                     </div>
-                    ${data.chamberFanSpeed !== null && data.chamberFanSpeed !== undefined ? `
+                    ` : ''}
+                    ${data.showChamberFan && data.chamberFanSpeed !== null && data.chamberFanSpeed !== undefined ? `
                     <div class="overlay-pill" data-pill="chamber-fan">
                         <div class="pill-icon-container"><ha-icon icon="mdi:fan-chevron-up" style="color: #22d3ee;"></ha-icon></div>
                         <div class="pill-content">
@@ -2164,7 +2440,7 @@ class PrismBambuCard extends HTMLElement {
                         </div>
                     </div>
                     ` : ''}
-                    ${data.heatbreakFanSpeed !== null && data.heatbreakFanSpeed !== undefined ? `
+                    ${data.showHeatbreakFan && data.heatbreakFanSpeed !== null && data.heatbreakFanSpeed !== undefined ? `
                     <div class="overlay-pill" data-pill="heatbreak-fan">
                         <div class="pill-icon-container"><ha-icon icon="mdi:fan-alert" style="color: #f472b6;"></ha-icon></div>
                         <div class="pill-content">
@@ -2173,16 +2449,16 @@ class PrismBambuCard extends HTMLElement {
                         </div>
                     </div>
                     ` : ''}
-                    ${data.humidity !== null ? `
+                    ${data.showHumidity && data.humidity !== null ? `
                     <div class="overlay-pill" data-pill="humidity">
                         <div class="pill-icon-container"><ha-icon icon="mdi:water-percent" style="color: #60a5fa;"></ha-icon></div>
                         <div class="pill-content">
                             <span class="pill-value">${Math.round(data.humidity)}%</span>
-                            <span class="pill-label">Humid</span>
+                            <span class="pill-label">${data.humidityName}</span>
                         </div>
                     </div>
                     ` : ''}
-                    ${data.customFanSpeed !== null ? `
+                    ${data.showCustomFan && data.customFanSpeed !== null ? `
                     <div class="overlay-pill" data-pill="custom-fan">
                         <div class="pill-icon-container"><ha-icon icon="mdi:fan-auto" style="color: #fbbf24;"></ha-icon></div>
                         <div class="pill-content">
@@ -2194,6 +2470,7 @@ class PrismBambuCard extends HTMLElement {
                 </div>
                 
                 <div class="overlay-right">
+                    ${data.showNozzleTemp ? `
                     <div class="overlay-pill right" data-pill="nozzle-temp">
                         <div class="pill-icon-container"><ha-icon icon="mdi:thermometer" style="color: #F87171;"></ha-icon></div>
                         <div class="pill-content">
@@ -2201,6 +2478,8 @@ class PrismBambuCard extends HTMLElement {
                             <span class="pill-label">/${data.targetNozzleTemp}°</span>
                         </div>
                     </div>
+                    ` : ''}
+                    ${data.showBedTemp ? `
                     <div class="overlay-pill right" data-pill="bed-temp">
                         <div class="pill-icon-container"><ha-icon icon="mdi:radiator" style="color: #FB923C;"></ha-icon></div>
                         <div class="pill-content">
@@ -2208,6 +2487,8 @@ class PrismBambuCard extends HTMLElement {
                             <span class="pill-label">/${data.targetBedTemp}°</span>
                         </div>
                     </div>
+                    ` : ''}
+                    ${data.showChamberTemp ? `
                     <div class="overlay-pill right" data-pill="chamber-temp">
                         <div class="pill-icon-container"><ha-icon icon="mdi:thermometer" style="color: #4ade80;"></ha-icon></div>
                         <div class="pill-content">
@@ -2215,12 +2496,13 @@ class PrismBambuCard extends HTMLElement {
                             <span class="pill-label">Cham</span>
                         </div>
                     </div>
-                    ${data.customTemp !== null ? `
+                    ` : ''}
+                    ${data.showCustomTemp && data.customTemp !== null ? `
                     <div class="overlay-pill right" data-pill="custom-temp">
                         <div class="pill-icon-container"><ha-icon icon="mdi:thermometer-lines" style="color: #a78bfa;"></ha-icon></div>
                         <div class="pill-content">
                             <span class="pill-value">${Math.round(data.customTemp)}°</span>
-                            <span class="pill-label">Custom</span>
+                            <span class="pill-label">${data.customTempName}</span>
                         </div>
                     </div>
                     ` : ''}
