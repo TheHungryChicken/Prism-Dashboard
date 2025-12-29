@@ -43,6 +43,7 @@ class PrismBambuCard extends HTMLElement {
     this._deviceEntities = {}; // Cache for device entities
     this._lastStatus = null; // Track status for re-render decisions
     this._updateThrottleTimer = null; // Throttle updates to prevent excessive re-renders
+    this._snapshotInterval = null; // Interval for snapshot mode camera updates
   }
   
   // Debug logging helper - only logs if DEBUG is enabled
@@ -96,6 +97,11 @@ class PrismBambuCard extends HTMLElement {
           name: 'camera_entity',
           label: 'Camera entity (optional - auto-detected if not set)',
           selector: { entity: { domain: 'camera' } }
+        },
+        {
+          name: 'camera_live_stream',
+          label: 'Use live stream (off = snapshot every 2 sec)',
+          selector: { boolean: {} }
         },
         {
           name: 'image',
@@ -513,6 +519,10 @@ class PrismBambuCard extends HTMLElement {
       clearTimeout(this._updateThrottleTimer);
       this._updateThrottleTimer = null;
     }
+    if (this._snapshotInterval) {
+      clearInterval(this._snapshotInterval);
+      this._snapshotInterval = null;
+    }
     this._powerToggleDebounce = false;
   }
 
@@ -556,29 +566,89 @@ class PrismBambuCard extends HTMLElement {
       };
     }
     
-    // Camera container - create ha-camera-stream element programmatically
+    // Camera container - create camera view (live stream or snapshot)
     const cameraContainer = this.shadowRoot?.querySelector('.camera-container');
     if (cameraContainer && this._hass) {
       const entityId = cameraContainer.dataset.entity;
       const stateObj = this._hass.states[entityId];
       
       if (stateObj) {
-        // Create the camera stream element
-        const cameraStream = document.createElement('ha-camera-stream');
-        cameraStream.hass = this._hass;
-        cameraStream.stateObj = stateObj;
-        cameraStream.className = 'camera-feed';
-        cameraStream.style.cursor = 'pointer';
+        // Check config for live stream mode (default: true)
+        const useLiveStream = this.config.camera_live_stream !== false;
         
-        // Click to open popup
-        cameraStream.onclick = (e) => {
-          e.stopPropagation();
-          this.openCameraPopup();
-        };
+        // Clear any existing snapshot interval
+        if (this._snapshotInterval) {
+          clearInterval(this._snapshotInterval);
+          this._snapshotInterval = null;
+        }
         
-        // Clear container and add stream
-        cameraContainer.innerHTML = '';
-        cameraContainer.appendChild(cameraStream);
+        if (useLiveStream) {
+          // LIVE STREAM MODE - use ha-camera-stream element
+          const cameraStream = document.createElement('ha-camera-stream');
+          cameraStream.hass = this._hass;
+          cameraStream.stateObj = stateObj;
+          cameraStream.className = 'camera-feed';
+          cameraStream.style.cursor = 'pointer';
+          
+          // Enable live stream with muted audio for autoplay
+          cameraStream.muted = true;
+          cameraStream.controls = true;
+          cameraStream.allowExoPlayer = true;
+          
+          // Set attributes for live streaming
+          cameraStream.setAttribute('muted', '');
+          cameraStream.setAttribute('controls', '');
+          cameraStream.setAttribute('autoplay', '');
+          
+          PrismBambuCard.log('Camera live stream created:', entityId);
+          
+          // Click to open popup with full stream
+          cameraStream.onclick = (e) => {
+            e.stopPropagation();
+            this.openCameraPopup();
+          };
+          
+          // Clear container and add stream
+          cameraContainer.innerHTML = '';
+          cameraContainer.appendChild(cameraStream);
+        } else {
+          // SNAPSHOT MODE - use img element with periodic refresh
+          const snapshotImg = document.createElement('img');
+          snapshotImg.className = 'camera-feed camera-snapshot';
+          snapshotImg.style.cursor = 'pointer';
+          snapshotImg.alt = 'Camera Snapshot';
+          
+          // Function to update snapshot
+          const updateSnapshot = () => {
+            if (this._hass && entityId) {
+              const currentState = this._hass.states[entityId];
+              if (currentState?.attributes?.entity_picture) {
+                // Add timestamp to prevent caching
+                const baseUrl = currentState.attributes.entity_picture;
+                const separator = baseUrl.includes('?') ? '&' : '?';
+                snapshotImg.src = `${baseUrl}${separator}_ts=${Date.now()}`;
+              }
+            }
+          };
+          
+          // Initial snapshot
+          updateSnapshot();
+          
+          // Refresh snapshot every 2 seconds
+          this._snapshotInterval = setInterval(updateSnapshot, 2000);
+          
+          PrismBambuCard.log('Camera snapshot mode created:', entityId, 'Refresh: 2s');
+          
+          // Click to open popup with full stream (popup always shows live stream)
+          snapshotImg.onclick = (e) => {
+            e.stopPropagation();
+            this.openCameraPopup();
+          };
+          
+          // Clear container and add snapshot image
+          cameraContainer.innerHTML = '';
+          cameraContainer.appendChild(snapshotImg);
+        }
       }
     }
     
@@ -722,6 +792,13 @@ class PrismBambuCard extends HTMLElement {
 
   toggleView() {
     this.showCamera = !this.showCamera;
+    
+    // Stop snapshot interval when closing camera view
+    if (!this.showCamera && this._snapshotInterval) {
+      clearInterval(this._snapshotInterval);
+      this._snapshotInterval = null;
+    }
+    
     this.render();
   }
 
@@ -1932,6 +2009,9 @@ class PrismBambuCard extends HTMLElement {
             display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
         }
         .camera-feed {
             width: 100%;
@@ -1939,9 +2019,23 @@ class PrismBambuCard extends HTMLElement {
             object-fit: cover;
             cursor: pointer;
             transition: opacity 0.2s;
+            --video-max-height: 100%;
+        }
+        .camera-feed video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .camera-container ha-camera-stream {
+            width: 100%;
+            height: 100%;
         }
         .camera-feed:hover {
             opacity: 0.9;
+        }
+        .camera-snapshot {
+            object-fit: cover;
+            background: rgba(0,0,0,0.5);
         }
         
         /* Cover Image (3D Model Preview) - positioned on print bed */
