@@ -188,10 +188,6 @@ class PrismButtonLightCard extends HTMLElement {
           --primary-text-color: #1a1a1a;
           --secondary-text-color: #666;
           transition: all 0.2s ease-in-out;
-          margin-bottom: 8px;
-          width: 95% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
           min-height: 60px !important;
           display: flex;
           flex-direction: column;

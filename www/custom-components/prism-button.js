@@ -46,7 +46,8 @@ class PrismButtonCard extends HTMLElement {
     if (!config.entity) {
       throw new Error('Please define an entity');
     }
-    this._config = config;
+    // Create a copy to avoid modifying read-only config object
+    this._config = { ...config };
     if (!this._config.icon) {
       this._config.icon = "mdi:lightbulb";
     }
@@ -185,10 +186,6 @@ class PrismButtonCard extends HTMLElement {
           --primary-text-color: #e0e0e0;
           --secondary-text-color: #999;
           transition: all 0.2s ease-in-out;
-          margin-bottom: 8px;
-          width: 95% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
           min-height: 60px !important;
           display: flex;
           flex-direction: column;

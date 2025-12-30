@@ -3,7 +3,7 @@
  * https://github.com/BangerTech/Prism-Dashboard
  * 
  * Version: 1.0.0
- * Build Date: 2025-12-30T07:57:03.889Z
+ * Build Date: 2025-12-30T08:11:45.889Z
  * 
  * This file contains all Prism custom cards bundled together.
  * Just add this single file as a resource in Lovelace:
@@ -209,10 +209,6 @@ class PrismButtonCard extends HTMLElement {
           --primary-text-color: #e0e0e0;
           --secondary-text-color: #999;
           transition: all 0.2s ease-in-out;
-          margin-bottom: 8px;
-          width: 95% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
           min-height: 60px !important;
           display: flex;
           flex-direction: column;
@@ -532,10 +528,6 @@ class PrismButtonLightCard extends HTMLElement {
           --primary-text-color: #1a1a1a;
           --secondary-text-color: #666;
           transition: all 0.2s ease-in-out;
-          margin-bottom: 8px;
-          width: 95% !important;
-          margin-left: auto !important;
-          margin-right: auto !important;
           min-height: 60px !important;
           display: flex;
           flex-direction: column;
