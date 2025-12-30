@@ -9,7 +9,7 @@
  * - Day/Night transitions with house dimming
  * - Sunrise/Sunset effects
  * 
- * @version 1.2.1
+ * @version 1.2.2
  * @author BangerTech
  */
 
@@ -1902,7 +1902,7 @@ class PrismEnergyCard extends HTMLElement {
             </div>
           </div>
 
-          <!-- Consumption -->
+          <!-- Consumption (including EV if configured) -->
           <div class="detail-col">
             <div class="detail-header">${this._t('consumption')}</div>
             <div class="detail-content">
@@ -1910,6 +1910,12 @@ class PrismEnergyCard extends HTMLElement {
                 <span class="detail-label">${this._t('current')}</span>
                 <span class="detail-val">${this._formatPower(homeConsumption)}</span>
               </div>
+              ${hasEV ? `
+              <div class="detail-row">
+                <span class="detail-label">E-Auto</span>
+                <span class="detail-val" style="color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.4)'};">${isEvCharging ? this._formatPower(evPower) : this._t('idle')}</span>
+              </div>
+              ` : ''}
             </div>
             <div class="detail-bar">
               <div class="detail-fill" style="width: ${Math.min(100, (homeConsumption / this._config.max_consumption) * 100)}%; background: ${colors.home};"></div>
@@ -1956,7 +1962,7 @@ window.customCards.push({
 });
 
 console.info(
-  `%c PRISM-ENERGY %c v1.2.1 %c kW/W Auto-Detection `,
+  `%c PRISM-ENERGY %c v1.2.2 %c EV in Consumption `,
   'background: #F59E0B; color: black; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;',
   'background: #1e2024; color: white; font-weight: bold; padding: 2px 6px;',
   'background: #3B82F6; color: white; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;'

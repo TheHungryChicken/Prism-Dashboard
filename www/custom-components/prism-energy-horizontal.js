@@ -8,7 +8,7 @@
  * - Weather effects (rain, snow, fog, sun, moon, stars)
  * - Day/Night transitions with house dimming
  * 
- * @version 1.2.1
+ * @version 1.2.2
  * @author BangerTech
  */
 
@@ -1875,9 +1875,19 @@ class PrismEnergyHorizontalCard extends HTMLElement {
           <!-- EV Section -->
           <div class="details-section">
             <div class="details-title">E-Auto</div>
-            <div class="module-item" data-entity="${this._config.ev_power}">
-              <span class="module-name">Ladeleistung</span>
-              <span class="module-value" style="color: ${colors.ev};">${isEvCharging ? this._formatPower(evPower) : 'Nicht aktiv'}</span>
+            <div class="battery-display" data-entity="${this._config.ev_power}" style="cursor: pointer;">
+              <div class="battery-icon-container">
+                <ha-icon icon="mdi:car-electric" style="--mdc-icon-size: clamp(40px, 4vw, 56px); color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.3)'}; filter: ${isEvCharging ? 'drop-shadow(0 0 10px rgba(236, 72, 153, 0.4))' : 'none'};"></ha-icon>
+              </div>
+              <div class="battery-soc" style="color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.5)'};">${isEvCharging ? this._formatPower(evPower) : '—'}</div>
+              <div class="battery-info">
+                <div class="battery-row">
+                  <span class="battery-label">Status</span>
+                  <span class="battery-value" style="color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.5)'};">
+                    ${isEvCharging ? this._t('charging') : this._t('idle')}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           ` : ''}
@@ -1950,7 +1960,7 @@ window.customCards.push({
 });
 
 console.info(
-  `%c PRISM-ENERGY-HORIZONTAL %c v1.2.1 %c kW/W Auto-Detection `,
+  `%c PRISM-ENERGY-HORIZONTAL %c v1.2.2 %c EV Details Section `,
   'background: #F59E0B; color: black; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;',
   'background: #1e2024; color: white; font-weight: bold; padding: 2px 6px;',
   'background: #3B82F6; color: white; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;'

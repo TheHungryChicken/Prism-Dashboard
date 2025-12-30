@@ -3,7 +3,7 @@
  * https://github.com/BangerTech/Prism-Dashboard
  * 
  * Version: 1.0.0
- * Build Date: 2025-12-30T13:01:32.829Z
+ * Build Date: 2025-12-30T13:53:18.116Z
  * 
  * This file contains all Prism custom cards bundled together.
  * Just add this single file as a resource in Lovelace:
@@ -10794,7 +10794,7 @@ window.customCards.push({
  * - Day/Night transitions with house dimming
  * - Sunrise/Sunset effects
  * 
- * @version 1.2.1
+ * @version 1.2.2
  * @author BangerTech
  */
 
@@ -12687,7 +12687,7 @@ class PrismEnergyCard extends HTMLElement {
             </div>
           </div>
 
-          <!-- Consumption -->
+          <!-- Consumption (including EV if configured) -->
           <div class="detail-col">
             <div class="detail-header">${this._t('consumption')}</div>
             <div class="detail-content">
@@ -12695,6 +12695,12 @@ class PrismEnergyCard extends HTMLElement {
                 <span class="detail-label">${this._t('current')}</span>
                 <span class="detail-val">${this._formatPower(homeConsumption)}</span>
               </div>
+              ${hasEV ? `
+              <div class="detail-row">
+                <span class="detail-label">E-Auto</span>
+                <span class="detail-val" style="color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.4)'};">${isEvCharging ? this._formatPower(evPower) : this._t('idle')}</span>
+              </div>
+              ` : ''}
             </div>
             <div class="detail-bar">
               <div class="detail-fill" style="width: ${Math.min(100, (homeConsumption / this._config.max_consumption) * 100)}%; background: ${colors.home};"></div>
@@ -12741,7 +12747,7 @@ window.customCards.push({
 });
 
 console.info(
-  `%c PRISM-ENERGY %c v1.2.1 %c kW/W Auto-Detection `,
+  `%c PRISM-ENERGY %c v1.2.2 %c EV in Consumption `,
   'background: #F59E0B; color: black; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;',
   'background: #1e2024; color: white; font-weight: bold; padding: 2px 6px;',
   'background: #3B82F6; color: white; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;'
@@ -12764,7 +12770,7 @@ console.info(
  * - Weather effects (rain, snow, fog, sun, moon, stars)
  * - Day/Night transitions with house dimming
  * 
- * @version 1.2.1
+ * @version 1.2.2
  * @author BangerTech
  */
 
@@ -14631,9 +14637,19 @@ class PrismEnergyHorizontalCard extends HTMLElement {
           <!-- EV Section -->
           <div class="details-section">
             <div class="details-title">E-Auto</div>
-            <div class="module-item" data-entity="${this._config.ev_power}">
-              <span class="module-name">Ladeleistung</span>
-              <span class="module-value" style="color: ${colors.ev};">${isEvCharging ? this._formatPower(evPower) : 'Nicht aktiv'}</span>
+            <div class="battery-display" data-entity="${this._config.ev_power}" style="cursor: pointer;">
+              <div class="battery-icon-container">
+                <ha-icon icon="mdi:car-electric" style="--mdc-icon-size: clamp(40px, 4vw, 56px); color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.3)'}; filter: ${isEvCharging ? 'drop-shadow(0 0 10px rgba(236, 72, 153, 0.4))' : 'none'};"></ha-icon>
+              </div>
+              <div class="battery-soc" style="color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.5)'};">${isEvCharging ? this._formatPower(evPower) : '—'}</div>
+              <div class="battery-info">
+                <div class="battery-row">
+                  <span class="battery-label">Status</span>
+                  <span class="battery-value" style="color: ${isEvCharging ? colors.ev : 'rgba(255,255,255,0.5)'};">
+                    ${isEvCharging ? this._t('charging') : this._t('idle')}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           ` : ''}
@@ -14706,7 +14722,7 @@ window.customCards.push({
 });
 
 console.info(
-  `%c PRISM-ENERGY-HORIZONTAL %c v1.2.1 %c kW/W Auto-Detection `,
+  `%c PRISM-ENERGY-HORIZONTAL %c v1.2.2 %c EV Details Section `,
   'background: #F59E0B; color: black; font-weight: bold; padding: 2px 6px; border-radius: 4px 0 0 4px;',
   'background: #1e2024; color: white; font-weight: bold; padding: 2px 6px;',
   'background: #3B82F6; color: white; font-weight: bold; padding: 2px 6px; border-radius: 0 4px 4px 0;'
