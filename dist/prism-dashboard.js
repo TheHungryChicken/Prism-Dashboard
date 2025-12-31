@@ -3,7 +3,7 @@
  * https://github.com/BangerTech/Prism-Dashboard
  * 
  * Version: 1.0.0
- * Build Date: 2025-12-31T10:17:17.895Z
+ * Build Date: 2025-12-31T13:49:13.363Z
  * 
  * This file contains all Prism custom cards bundled together.
  * Just add this single file as a resource in Lovelace:
@@ -547,58 +547,63 @@ class PrismButtonLightCard extends HTMLElement {
         }
         
         /* ============================================
-           NEUMORPHISM LIGHT THEME
-           Base color: #e0e5ec (soft gray)
+           GLASSMORPHISM LIGHT THEME
+           Transparent glass with blur + neumorphic icons
            ============================================ */
         
         ha-card {
-          /* Solid neumorphic background with subtle gradient */
-          background: linear-gradient(145deg, #e6ebf2, #d1d9e6) !important;
+          /* Glassmorphism background - more transparent like dark version */
+          background: ${isActive 
+            ? 'rgba(240, 242, 245, 0.5)' 
+            : 'rgba(255, 255, 255, 0.6)'} !important;
+          backdrop-filter: blur(12px) !important;
+          -webkit-backdrop-filter: blur(12px) !important;
           
           border-radius: 16px !important;
           
-          /* NO borders in true neumorphism - shadows create depth */
-          border: none !important;
+          /* Subtle glass borders for 3D depth */
+          border: 1px solid rgba(255, 255, 255, 0.5) !important;
+          border-top: ${isActive 
+            ? '1px solid rgba(0, 0, 0, 0.08)' 
+            : '1px solid rgba(255, 255, 255, 0.8)'} !important;
+          border-bottom: ${isActive 
+            ? '1px solid rgba(255, 255, 255, 0.5)' 
+            : '1px solid rgba(0, 0, 0, 0.15)'} !important;
           
-          /* The magic: dual shadows (light top-left, dark bottom-right) */
+          /* Shadows - stronger inset for pressed state */
           box-shadow: ${isActive 
-            ? `/* PRESSED STATE - inset shadows */
-               inset 4px 4px 8px rgba(163, 177, 198, 0.5),
-               inset -4px -4px 8px rgba(255, 255, 255, 0.7),
-               inset 1px 1px 3px rgba(163, 177, 198, 0.3)` 
-            : `/* RAISED STATE - subtle outer shadows */
-               5px 5px 10px rgba(163, 177, 198, 0.4),
-               -5px -5px 10px rgba(255, 255, 255, 0.6),
-               inset 1px 1px 1px rgba(255, 255, 255, 0.2)`} !important;
+            ? `/* PRESSED STATE - strong inset like dark version */
+               inset 2px 2px 6px rgba(0, 0, 0, 0.15),
+               inset -1px -1px 3px rgba(255, 255, 255, 0.7),
+               inset 1px 1px 3px rgba(0, 0, 0, 0.1)` 
+            : `/* RAISED STATE */
+               0 10px 20px -5px rgba(0, 0, 0, 0.15),
+               0 2px 4px rgba(0, 0, 0, 0.08)`} !important;
           
-          --primary-text-color: #2d3748;
-          --secondary-text-color: #718096;
+          --primary-text-color: #1a1a1a;
+          --secondary-text-color: #666;
           
-          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: all 0.2s ease-in-out;
           min-height: 60px !important;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          transform: ${isActive ? 'scale(0.98)' : 'none'};
+          transform: ${isActive ? 'translateY(2px)' : 'none'};
           cursor: pointer;
         }
         
         ha-card:hover {
           box-shadow: ${isActive 
-            ? `inset 4px 4px 8px rgba(163, 177, 198, 0.5),
-               inset -4px -4px 8px rgba(255, 255, 255, 0.7),
-               inset 1px 1px 3px rgba(163, 177, 198, 0.3)` 
-            : `6px 6px 12px rgba(163, 177, 198, 0.5),
-               -6px -6px 12px rgba(255, 255, 255, 0.7),
-               inset 1px 1px 1px rgba(255, 255, 255, 0.2)`} !important;
+            ? `inset 2px 2px 6px rgba(0, 0, 0, 0.15),
+               inset -1px -1px 3px rgba(255, 255, 255, 0.7),
+               inset 1px 1px 3px rgba(0, 0, 0, 0.1)` 
+            : `0 12px 24px -5px rgba(0, 0, 0, 0.18),
+               0 4px 8px rgba(0, 0, 0, 0.1),
+               0 0 0 1px rgba(0, 0, 0, 0.03)`} !important;
         }
         
         ha-card:active {
-          transform: scale(0.98);
-          box-shadow: 
-            inset 4px 4px 8px rgba(163, 177, 198, 0.5),
-            inset -4px -4px 8px rgba(255, 255, 255, 0.7),
-            inset 1px 1px 3px rgba(163, 177, 198, 0.3) !important;
+          transform: scale(0.98) ${isActive ? 'translateY(2px)' : ''};
         }
         
         .card-content {
@@ -619,7 +624,7 @@ class PrismButtonLightCard extends HTMLElement {
           height: 48px;
         }
         
-        /* Neumorphic icon circle */
+        /* Glassmorphic icon circle with glow */
         .icon-circle {
           position: absolute;
           width: 100%;
@@ -627,26 +632,29 @@ class PrismButtonLightCard extends HTMLElement {
           border-radius: 50%;
           
           ${iconColor ? `
-            /* Active state with color glow */
+            /* ACTIVE STATE - with color glow like dark version */
             background: linear-gradient(145deg, 
-              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.15)')}, 
-              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.25)')});
+              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.2)')}, 
+              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.1)')});
             box-shadow: 
-              /* Outer neumorphic shadows */
-              4px 4px 8px rgba(163, 177, 198, 0.5),
-              -4px -4px 8px rgba(255, 255, 255, 0.8),
+              /* Subtle outer shadows */
+              3px 3px 8px rgba(0, 0, 0, 0.1),
+              -2px -2px 6px rgba(255, 255, 255, 0.5),
               /* Color glow */
-              0 0 20px ${iconColor.shadow.replace('0.6', '0.4')},
-              0 0 40px ${iconColor.shadow.replace('0.6', '0.2')},
+              0 0 12px ${iconColor.shadow.replace('0.6', '0.4')},
+              0 0 24px ${iconColor.shadow.replace('0.6', '0.2')},
               /* Inner highlight */
-              inset 2px 2px 4px rgba(255, 255, 255, 0.3),
-              inset -1px -1px 3px ${iconColor.shadow.replace('0.6', '0.2')};
+              inset 1px 1px 2px rgba(255, 255, 255, 0.4);
           ` : `
-            /* Inactive neumorphic inset (depressed) */
-            background: linear-gradient(145deg, #d1d9e6, #e6ebf2);
+            /* INACTIVE STATE - stronger inset for depth */
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 
-              inset 3px 3px 6px rgba(163, 177, 198, 0.5),
-              inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+              inset 3px 3px 8px rgba(0, 0, 0, 0.12),
+              inset -2px -2px 6px rgba(255, 255, 255, 0.6),
+              inset 1px 1px 3px rgba(0, 0, 0, 0.06);
           `}
           transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
@@ -663,9 +671,9 @@ class PrismButtonLightCard extends HTMLElement {
           --mdc-icon-size: 24px;
           ${iconColor 
             ? `color: ${iconColor.color} !important; 
-               filter: drop-shadow(0 0 8px ${iconColor.shadow.replace('0.6', '0.5')});` 
-            : 'color: #718096;'}
-          transition: all 0.3s ease;
+               filter: drop-shadow(0 0 6px ${iconColor.shadow.replace('0.6', '0.45')});` 
+            : 'color: rgba(0, 0, 0, 0.35);'}
+          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
         
         .info {
@@ -676,20 +684,20 @@ class PrismButtonLightCard extends HTMLElement {
         }
         
         .name {
-          font-size: 16px;
-          font-weight: 600;
-          color: #2d3748;
+          font-size: 15px;
+          font-weight: 700;
+          color: #1a1a1a;
           margin-bottom: 4px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          letter-spacing: 0.3px;
+          letter-spacing: 0.2px;
         }
         
         .state {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 500;
-          color: #718096;
+          color: #666;
           text-transform: capitalize;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -743,7 +751,7 @@ window.customCards.push({
   type: "prism-button-light",
   name: "Prism Button Light",
   preview: true,
-  description: "A neumorphism-styled entity card with soft shadows and depth effects"
+  description: "A glassmorphism-styled entity card with transparency, blur and glowing icons"
 });
 
 })();
@@ -11511,9 +11519,8 @@ class PrismEnergyCard extends HTMLElement {
     this._setFlowVisibility('flow-battery-grid', isBatteryDischarging && isGridExport);
     
     if (hasEV) {
-      this._setFlowVisibility('flow-solar-ev', isSolarActive && isEvCharging);
-      this._setFlowVisibility('flow-grid-ev', isGridImport && isEvCharging);
-      this._setFlowVisibility('flow-battery-ev', isBatteryDischarging && isEvCharging);
+      // EV is treated as sub-load of home - only one line from home to EV
+      this._setFlowVisibility('flow-home-ev', isEvCharging);
     }
   }
 
@@ -12375,17 +12382,17 @@ class PrismEnergyCard extends HTMLElement {
       solarToHome: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.home).x + 1} ${midPoint(pillPos.solar, pillPos.home).y} ${pillPos.home.x} ${pillPos.home.y}`,
       solarToBattery: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.battery).x} ${midPoint(pillPos.solar, pillPos.battery).y} ${pillPos.battery.x} ${pillPos.battery.y}`,
       solarToGrid: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.grid).x} ${midPoint(pillPos.solar, pillPos.grid).y} ${pillPos.grid.x} ${pillPos.grid.y}`,
-      solarToEv: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.ev).x} ${midPoint(pillPos.solar, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`,
       
       // Grid flows from left (power pole)
       gridToHome: `M ${pillPos.grid.x} ${pillPos.grid.y} Q ${midPoint(pillPos.grid, pillPos.home).x} ${midPoint(pillPos.grid, pillPos.home).y} ${pillPos.home.x} ${pillPos.home.y}`,
       gridToBattery: `M ${pillPos.grid.x} ${pillPos.grid.y} Q ${midPoint(pillPos.grid, pillPos.battery).x} ${midPoint(pillPos.grid, pillPos.battery).y} ${pillPos.battery.x} ${pillPos.battery.y}`,
-      gridToEv: `M ${pillPos.grid.x} ${pillPos.grid.y} Q ${midPoint(pillPos.grid, pillPos.ev).x} ${midPoint(pillPos.grid, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`,
       
       // Battery flows from right (battery storage)
       batteryToHome: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.home).x} ${midPoint(pillPos.battery, pillPos.home).y} ${pillPos.home.x} ${pillPos.home.y}`,
-      batteryToEv: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.ev).x} ${midPoint(pillPos.battery, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`,
-      batteryToGrid: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.grid).x} ${midPoint(pillPos.battery, pillPos.grid).y} ${pillPos.grid.x} ${pillPos.grid.y}`
+      batteryToGrid: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.grid).x} ${midPoint(pillPos.battery, pillPos.grid).y} ${pillPos.grid.x} ${pillPos.grid.y}`,
+      
+      // EV flow from home (EV is sub-load of home)
+      homeToEv: `M ${pillPos.home.x} ${pillPos.home.y} Q ${midPoint(pillPos.home, pillPos.ev).x} ${midPoint(pillPos.home, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`
     };
 
     // Colors
@@ -12923,17 +12930,17 @@ class PrismEnergyCard extends HTMLElement {
             ${this._renderFlow(paths.solarToHome, colors.solar, isSolarActive && homeConsumption > 0, false, 'flow-solar-home')}
             ${this._renderFlow(paths.solarToBattery, colors.solar, isSolarActive && isBatteryCharging, false, 'flow-solar-battery')}
             ${this._renderFlow(paths.solarToGrid, colors.solar, isSolarActive && isGridExport, false, 'flow-solar-grid')}
-            ${hasEV ? this._renderFlow(paths.solarToEv, colors.solar, isSolarActive && isEvCharging, false, 'flow-solar-ev') : ''}
 
             <!-- Grid Flows -->
             ${this._renderFlow(paths.gridToHome, colors.grid, isGridImport, false, 'flow-grid-home')}
             ${this._renderFlow(paths.gridToBattery, colors.grid, isGridImport && isBatteryCharging, false, 'flow-grid-battery')}
-            ${hasEV ? this._renderFlow(paths.gridToEv, colors.grid, isGridImport && isEvCharging, false, 'flow-grid-ev') : ''}
 
             <!-- Battery Flows -->
             ${this._renderFlow(paths.batteryToHome, colors.battery, isBatteryDischarging, false, 'flow-battery-home')}
-            ${hasEV ? this._renderFlow(paths.batteryToEv, colors.battery, isBatteryDischarging && isEvCharging, false, 'flow-battery-ev') : ''}
             ${this._renderFlow(paths.batteryToGrid, colors.battery, isBatteryDischarging && isGridExport, false, 'flow-battery-grid')}
+
+            <!-- EV Flow (sub-load of home) -->
+            ${hasEV ? this._renderFlow(paths.homeToEv, colors.ev, isEvCharging, false, 'flow-home-ev') : ''}
           </svg>
 
           <!-- Solar Pill (Top - Roof) - Clickable for history -->
@@ -13647,9 +13654,8 @@ class PrismEnergyHorizontalCard extends HTMLElement {
     this._setFlowVisibility('flow-battery-grid', isBatteryDischarging && isGridExport);
     
     if (hasEV) {
-      this._setFlowVisibility('flow-solar-ev', isSolarActive && isEvCharging);
-      this._setFlowVisibility('flow-grid-ev', isGridImport && isEvCharging);
-      this._setFlowVisibility('flow-battery-ev', isBatteryDischarging && isEvCharging);
+      // EV is treated as sub-load of home - only one line from home to EV
+      this._setFlowVisibility('flow-home-ev', isEvCharging);
     }
   }
 
@@ -14154,15 +14160,15 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       solarToHome: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.home).x} ${midPoint(pillPos.solar, pillPos.home).y} ${pillPos.home.x} ${pillPos.home.y}`,
       solarToBattery: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.battery).x} ${midPoint(pillPos.solar, pillPos.battery).y} ${pillPos.battery.x} ${pillPos.battery.y}`,
       solarToGrid: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.grid).x} ${midPoint(pillPos.solar, pillPos.grid).y} ${pillPos.grid.x} ${pillPos.grid.y}`,
-      solarToEv: `M ${pillPos.solar.x} ${pillPos.solar.y} Q ${midPoint(pillPos.solar, pillPos.ev).x} ${midPoint(pillPos.solar, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`,
       
       gridToHome: `M ${pillPos.grid.x} ${pillPos.grid.y} Q ${midPoint(pillPos.grid, pillPos.home).x} ${midPoint(pillPos.grid, pillPos.home).y} ${pillPos.home.x} ${pillPos.home.y}`,
       gridToBattery: `M ${pillPos.grid.x} ${pillPos.grid.y} Q ${midPoint(pillPos.grid, pillPos.battery).x} ${midPoint(pillPos.grid, pillPos.battery).y} ${pillPos.battery.x} ${pillPos.battery.y}`,
-      gridToEv: `M ${pillPos.grid.x} ${pillPos.grid.y} Q ${midPoint(pillPos.grid, pillPos.ev).x} ${midPoint(pillPos.grid, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`,
       
       batteryToHome: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.home).x} ${midPoint(pillPos.battery, pillPos.home).y} ${pillPos.home.x} ${pillPos.home.y}`,
-      batteryToEv: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.ev).x} ${midPoint(pillPos.battery, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`,
-      batteryToGrid: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.grid).x} ${midPoint(pillPos.battery, pillPos.grid).y} ${pillPos.grid.x} ${pillPos.grid.y}`
+      batteryToGrid: `M ${pillPos.battery.x} ${pillPos.battery.y} Q ${midPoint(pillPos.battery, pillPos.grid).x} ${midPoint(pillPos.battery, pillPos.grid).y} ${pillPos.grid.x} ${pillPos.grid.y}`,
+      
+      // EV flow from home (EV is sub-load of home)
+      homeToEv: `M ${pillPos.home.x} ${pillPos.home.y} Q ${midPoint(pillPos.home, pillPos.ev).x} ${midPoint(pillPos.home, pillPos.ev).y} ${pillPos.ev.x} ${pillPos.ev.y}`
     };
 
     // Colors
@@ -14908,17 +14914,17 @@ class PrismEnergyHorizontalCard extends HTMLElement {
                 ${this._renderFlow(paths.solarToHome, colors.solar, isSolarActive && homeConsumption > 0, false, 'flow-solar-home')}
                 ${this._renderFlow(paths.solarToBattery, colors.solar, isSolarActive && isBatteryCharging, false, 'flow-solar-battery')}
                 ${this._renderFlow(paths.solarToGrid, colors.solar, isSolarActive && isGridExport, false, 'flow-solar-grid')}
-                ${hasEV ? this._renderFlow(paths.solarToEv, colors.solar, isSolarActive && isEvCharging, false, 'flow-solar-ev') : ''}
 
                 <!-- Grid Flows -->
                 ${this._renderFlow(paths.gridToHome, colors.grid, isGridImport, false, 'flow-grid-home')}
                 ${this._renderFlow(paths.gridToBattery, colors.grid, isGridImport && isBatteryCharging, false, 'flow-grid-battery')}
-                ${hasEV ? this._renderFlow(paths.gridToEv, colors.grid, isGridImport && isEvCharging, false, 'flow-grid-ev') : ''}
 
                 <!-- Battery Flows -->
                 ${this._renderFlow(paths.batteryToHome, colors.battery, isBatteryDischarging, false, 'flow-battery-home')}
-                ${hasEV ? this._renderFlow(paths.batteryToEv, colors.battery, isBatteryDischarging && isEvCharging, false, 'flow-battery-ev') : ''}
                 ${this._renderFlow(paths.batteryToGrid, colors.battery, isBatteryDischarging && isGridExport, false, 'flow-battery-grid')}
+
+                <!-- EV Flow (sub-load of home) -->
+                ${hasEV ? this._renderFlow(paths.homeToEv, colors.ev, isEvCharging, false, 'flow-home-ev') : ''}
               </svg>
 
               <!-- Solar Pill (Top - over roof) -->

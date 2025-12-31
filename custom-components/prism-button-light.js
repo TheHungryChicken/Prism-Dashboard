@@ -176,58 +176,63 @@ class PrismButtonLightCard extends HTMLElement {
         }
         
         /* ============================================
-           NEUMORPHISM LIGHT THEME
-           Base color: #e0e5ec (soft gray)
+           GLASSMORPHISM LIGHT THEME
+           Transparent glass with blur + neumorphic icons
            ============================================ */
         
         ha-card {
-          /* Solid neumorphic background with subtle gradient */
-          background: linear-gradient(145deg, #e6ebf2, #d1d9e6) !important;
+          /* Glassmorphism background - more transparent like dark version */
+          background: ${isActive 
+            ? 'rgba(240, 242, 245, 0.5)' 
+            : 'rgba(255, 255, 255, 0.6)'} !important;
+          backdrop-filter: blur(12px) !important;
+          -webkit-backdrop-filter: blur(12px) !important;
           
           border-radius: 16px !important;
           
-          /* NO borders in true neumorphism - shadows create depth */
-          border: none !important;
+          /* Subtle glass borders for 3D depth */
+          border: 1px solid rgba(255, 255, 255, 0.5) !important;
+          border-top: ${isActive 
+            ? '1px solid rgba(0, 0, 0, 0.08)' 
+            : '1px solid rgba(255, 255, 255, 0.8)'} !important;
+          border-bottom: ${isActive 
+            ? '1px solid rgba(255, 255, 255, 0.5)' 
+            : '1px solid rgba(0, 0, 0, 0.15)'} !important;
           
-          /* The magic: dual shadows (light top-left, dark bottom-right) */
+          /* Shadows - stronger inset for pressed state */
           box-shadow: ${isActive 
-            ? `/* PRESSED STATE - inset shadows */
-               inset 4px 4px 8px rgba(163, 177, 198, 0.5),
-               inset -4px -4px 8px rgba(255, 255, 255, 0.7),
-               inset 1px 1px 3px rgba(163, 177, 198, 0.3)` 
-            : `/* RAISED STATE - subtle outer shadows */
-               5px 5px 10px rgba(163, 177, 198, 0.4),
-               -5px -5px 10px rgba(255, 255, 255, 0.6),
-               inset 1px 1px 1px rgba(255, 255, 255, 0.2)`} !important;
+            ? `/* PRESSED STATE - strong inset like dark version */
+               inset 2px 2px 6px rgba(0, 0, 0, 0.15),
+               inset -1px -1px 3px rgba(255, 255, 255, 0.7),
+               inset 1px 1px 3px rgba(0, 0, 0, 0.1)` 
+            : `/* RAISED STATE */
+               0 10px 20px -5px rgba(0, 0, 0, 0.15),
+               0 2px 4px rgba(0, 0, 0, 0.08)`} !important;
           
-          --primary-text-color: #2d3748;
-          --secondary-text-color: #718096;
+          --primary-text-color: #1a1a1a;
+          --secondary-text-color: #666;
           
-          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+          transition: all 0.2s ease-in-out;
           min-height: 60px !important;
           display: flex;
           flex-direction: column;
           justify-content: center;
-          transform: ${isActive ? 'scale(0.98)' : 'none'};
+          transform: ${isActive ? 'translateY(2px)' : 'none'};
           cursor: pointer;
         }
         
         ha-card:hover {
           box-shadow: ${isActive 
-            ? `inset 4px 4px 8px rgba(163, 177, 198, 0.5),
-               inset -4px -4px 8px rgba(255, 255, 255, 0.7),
-               inset 1px 1px 3px rgba(163, 177, 198, 0.3)` 
-            : `6px 6px 12px rgba(163, 177, 198, 0.5),
-               -6px -6px 12px rgba(255, 255, 255, 0.7),
-               inset 1px 1px 1px rgba(255, 255, 255, 0.2)`} !important;
+            ? `inset 2px 2px 6px rgba(0, 0, 0, 0.15),
+               inset -1px -1px 3px rgba(255, 255, 255, 0.7),
+               inset 1px 1px 3px rgba(0, 0, 0, 0.1)` 
+            : `0 12px 24px -5px rgba(0, 0, 0, 0.18),
+               0 4px 8px rgba(0, 0, 0, 0.1),
+               0 0 0 1px rgba(0, 0, 0, 0.03)`} !important;
         }
         
         ha-card:active {
-          transform: scale(0.98);
-          box-shadow: 
-            inset 4px 4px 8px rgba(163, 177, 198, 0.5),
-            inset -4px -4px 8px rgba(255, 255, 255, 0.7),
-            inset 1px 1px 3px rgba(163, 177, 198, 0.3) !important;
+          transform: scale(0.98) ${isActive ? 'translateY(2px)' : ''};
         }
         
         .card-content {
@@ -248,7 +253,7 @@ class PrismButtonLightCard extends HTMLElement {
           height: 48px;
         }
         
-        /* Neumorphic icon circle */
+        /* Glassmorphic icon circle with glow */
         .icon-circle {
           position: absolute;
           width: 100%;
@@ -256,26 +261,29 @@ class PrismButtonLightCard extends HTMLElement {
           border-radius: 50%;
           
           ${iconColor ? `
-            /* Active state with color glow */
+            /* ACTIVE STATE - with color glow like dark version */
             background: linear-gradient(145deg, 
-              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.15)')}, 
-              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.25)')});
+              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.2)')}, 
+              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.1)')});
             box-shadow: 
-              /* Outer neumorphic shadows */
-              4px 4px 8px rgba(163, 177, 198, 0.5),
-              -4px -4px 8px rgba(255, 255, 255, 0.8),
+              /* Subtle outer shadows */
+              3px 3px 8px rgba(0, 0, 0, 0.1),
+              -2px -2px 6px rgba(255, 255, 255, 0.5),
               /* Color glow */
-              0 0 20px ${iconColor.shadow.replace('0.6', '0.4')},
-              0 0 40px ${iconColor.shadow.replace('0.6', '0.2')},
+              0 0 12px ${iconColor.shadow.replace('0.6', '0.4')},
+              0 0 24px ${iconColor.shadow.replace('0.6', '0.2')},
               /* Inner highlight */
-              inset 2px 2px 4px rgba(255, 255, 255, 0.3),
-              inset -1px -1px 3px ${iconColor.shadow.replace('0.6', '0.2')};
+              inset 1px 1px 2px rgba(255, 255, 255, 0.4);
           ` : `
-            /* Inactive neumorphic inset (depressed) */
-            background: linear-gradient(145deg, #d1d9e6, #e6ebf2);
+            /* INACTIVE STATE - stronger inset for depth */
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 
-              inset 3px 3px 6px rgba(163, 177, 198, 0.5),
-              inset -3px -3px 6px rgba(255, 255, 255, 0.8);
+              inset 3px 3px 8px rgba(0, 0, 0, 0.12),
+              inset -2px -2px 6px rgba(255, 255, 255, 0.6),
+              inset 1px 1px 3px rgba(0, 0, 0, 0.06);
           `}
           transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
@@ -292,9 +300,9 @@ class PrismButtonLightCard extends HTMLElement {
           --mdc-icon-size: 24px;
           ${iconColor 
             ? `color: ${iconColor.color} !important; 
-               filter: drop-shadow(0 0 8px ${iconColor.shadow.replace('0.6', '0.5')});` 
-            : 'color: #718096;'}
-          transition: all 0.3s ease;
+               filter: drop-shadow(0 0 6px ${iconColor.shadow.replace('0.6', '0.45')});` 
+            : 'color: rgba(0, 0, 0, 0.35);'}
+          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
         
         .info {
@@ -305,20 +313,20 @@ class PrismButtonLightCard extends HTMLElement {
         }
         
         .name {
-          font-size: 16px;
-          font-weight: 600;
-          color: #2d3748;
+          font-size: 15px;
+          font-weight: 700;
+          color: #1a1a1a;
           margin-bottom: 4px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
-          letter-spacing: 0.3px;
+          letter-spacing: 0.2px;
         }
         
         .state {
-          font-size: 13px;
+          font-size: 12px;
           font-weight: 500;
-          color: #718096;
+          color: #666;
           text-transform: capitalize;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -372,5 +380,5 @@ window.customCards.push({
   type: "prism-button-light",
   name: "Prism Button Light",
   preview: true,
-  description: "A neumorphism-styled entity card with soft shadows and depth effects"
+  description: "A glassmorphism-styled entity card with transparency, blur and glowing icons"
 });
