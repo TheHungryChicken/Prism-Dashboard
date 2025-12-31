@@ -52,14 +52,19 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       // Pill positions (optional - in percent)
       solar_pill_top: 21,
       solar_pill_left: 55,
+      solar_pill_scale: 1.0,
       grid_pill_top: 34,
       grid_pill_left: 18,
+      grid_pill_scale: 1.0,
       home_pill_top: 50,
       home_pill_left: 52,
+      home_pill_scale: 1.0,
       battery_pill_top: 62,
       battery_pill_left: 88,
+      battery_pill_scale: 1.0,
       ev_pill_top: 70,
-      ev_pill_left: 20
+      ev_pill_left: 20,
+      ev_pill_scale: 1.0
     };
   }
 
@@ -223,7 +228,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
         {
           type: "expandable",
           name: "",
-          title: "📍 Pill Positions (optional - in %)",
+          title: "📍 Pill Positions & Size (optional)",
           schema: [
             {
               type: "grid",
@@ -231,13 +236,18 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               schema: [
                 {
                   name: "solar_pill_top",
-                  label: "☀️ Solar Top 21%",
+                  label: "Solar pill top",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
                 },
                 {
                   name: "solar_pill_left",
-                  label: "☀️ Solar Left 55%",
+                  label: "Solar pill left",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
+                },
+                {
+                  name: "solar_pill_scale",
+                  label: "Solar pill size",
+                  selector: { number: { min: 0.5, max: 2.0, step: 0.1, mode: "box" } }
                 }
               ]
             },
@@ -247,13 +257,18 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               schema: [
                 {
                   name: "grid_pill_top",
-                  label: "⚡ Grid Top 34%",
+                  label: "Grid pill top",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
                 },
                 {
                   name: "grid_pill_left",
-                  label: "⚡ Grid Left 18%",
+                  label: "Grid pill left",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
+                },
+                {
+                  name: "grid_pill_scale",
+                  label: "Grid pill size",
+                  selector: { number: { min: 0.5, max: 2.0, step: 0.1, mode: "box" } }
                 }
               ]
             },
@@ -263,13 +278,18 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               schema: [
                 {
                   name: "home_pill_top",
-                  label: "🏠 Home Top 50%",
+                  label: "Home pill top",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
                 },
                 {
                   name: "home_pill_left",
-                  label: "🏠 Home Left 52%",
+                  label: "Home pill left",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
+                },
+                {
+                  name: "home_pill_scale",
+                  label: "Home pill size",
+                  selector: { number: { min: 0.5, max: 2.0, step: 0.1, mode: "box" } }
                 }
               ]
             },
@@ -279,13 +299,18 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               schema: [
                 {
                   name: "battery_pill_top",
-                  label: "🔋 Battery Top 62%",
+                  label: "Battery pill top",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
                 },
                 {
                   name: "battery_pill_left",
-                  label: "🔋 Battery Left 88%",
+                  label: "Battery pill left",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
+                },
+                {
+                  name: "battery_pill_scale",
+                  label: "Battery pill size",
+                  selector: { number: { min: 0.5, max: 2.0, step: 0.1, mode: "box" } }
                 }
               ]
             },
@@ -295,13 +320,18 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               schema: [
                 {
                   name: "ev_pill_top",
-                  label: "🚗 EV Top 70%",
+                  label: "Ev pill top",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
                 },
                 {
                   name: "ev_pill_left",
-                  label: "🚗 EV Left 20%",
+                  label: "Ev pill left",
                   selector: { number: { min: 0, max: 100, step: 1, mode: "box" } }
+                },
+                {
+                  name: "ev_pill_scale",
+                  label: "Ev pill size",
+                  selector: { number: { min: 0.5, max: 2.0, step: 0.1, mode: "box" } }
                 }
               ]
             }
@@ -343,14 +373,19 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       // Pill positions (in percent) - default values match current layout
       solar_pill_top: config.solar_pill_top ?? 21,
       solar_pill_left: config.solar_pill_left ?? 55,
+      solar_pill_scale: config.solar_pill_scale ?? 1.0,
       grid_pill_top: config.grid_pill_top ?? 34,
       grid_pill_left: config.grid_pill_left ?? 18,
+      grid_pill_scale: config.grid_pill_scale ?? 1.0,
       home_pill_top: config.home_pill_top ?? 50,
       home_pill_left: config.home_pill_left ?? 52,
+      home_pill_scale: config.home_pill_scale ?? 1.0,
       battery_pill_top: config.battery_pill_top ?? 62,
       battery_pill_left: config.battery_pill_left ?? 88,
+      battery_pill_scale: config.battery_pill_scale ?? 1.0,
       ev_pill_top: config.ev_pill_top ?? 70,
-      ev_pill_left: config.ev_pill_left ?? 20
+      ev_pill_left: config.ev_pill_left ?? 20,
+      ev_pill_scale: config.ev_pill_scale ?? 1.0
     };
   }
 
@@ -589,6 +624,18 @@ class PrismEnergyHorizontalCard extends HTMLElement {
         }
       });
     });
+
+    // Add click listener to autarkie badge (opens autarky history)
+    const autarkieBadge = this.shadowRoot.querySelector('.autarkie-badge[data-entity]');
+    if (autarkieBadge) {
+      autarkieBadge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const entityId = autarkieBadge.getAttribute('data-entity');
+        if (entityId) {
+          this._openMoreInfo(entityId);
+        }
+      });
+    }
   }
 
   // Helper to get entity state
@@ -982,13 +1029,13 @@ class PrismEnergyHorizontalCard extends HTMLElement {
     
     if (isBatteryCharging) batteryIcon = "mdi:battery-charging";
 
-    // Get pill positions from config (with defaults)
+    // Get pill positions and scale from config (with defaults)
     const pillPos = {
-      solar: { x: this._config.solar_pill_left, y: this._config.solar_pill_top },
-      grid: { x: this._config.grid_pill_left, y: this._config.grid_pill_top },
-      home: { x: this._config.home_pill_left, y: this._config.home_pill_top },
-      battery: { x: this._config.battery_pill_left, y: this._config.battery_pill_top },
-      ev: { x: this._config.ev_pill_left, y: this._config.ev_pill_top }
+      solar: { x: this._config.solar_pill_left, y: this._config.solar_pill_top, scale: this._config.solar_pill_scale },
+      grid: { x: this._config.grid_pill_left, y: this._config.grid_pill_top, scale: this._config.grid_pill_scale },
+      home: { x: this._config.home_pill_left, y: this._config.home_pill_top, scale: this._config.home_pill_scale },
+      battery: { x: this._config.battery_pill_left, y: this._config.battery_pill_top, scale: this._config.battery_pill_scale },
+      ev: { x: this._config.ev_pill_left, y: this._config.ev_pill_top, scale: this._config.ev_pill_scale }
     };
 
     // Helper to calculate control point for smooth curves
@@ -1157,6 +1204,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
           border: 1px solid rgba(255, 255, 255, 0.05);
           border-top: 1px solid rgba(0, 0, 0, 0.3);
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          cursor: pointer;
         }
         
         .autarkie-icon {
@@ -1310,6 +1358,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
 
         /* Data Pills - Fixed to image positions */
         .pill {
+          --pill-scale: 1;
           position: absolute;
           display: flex;
           align-items: center;
@@ -1327,13 +1376,13 @@ class PrismEnergyHorizontalCard extends HTMLElement {
           border-top: 1px solid rgba(0, 0, 0, 0.3);
           border-bottom: 1px solid rgba(255, 255, 255, 0.08);
           z-index: 20;
-          transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%) scale(var(--pill-scale));
           white-space: nowrap;
           transition: all 0.2s ease;
         }
         
         .pill:hover {
-          transform: translate(-50%, -50%) scale(1.05);
+          transform: translate(-50%, -50%) scale(calc(var(--pill-scale) * 1.05));
         }
         
         .pill[data-entity] {
@@ -1341,7 +1390,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
         }
         
         .pill[data-entity]:active {
-          transform: translate(-50%, -50%) scale(0.97);
+          transform: translate(-50%, -50%) scale(calc(var(--pill-scale) * 0.97));
         }
         
         .pill-icon {
@@ -1768,7 +1817,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               </svg>
 
               <!-- Solar Pill (Top - over roof) -->
-              <div class="pill pill-solar" style="top: ${pillPos.solar.y}%; left: ${pillPos.solar.x}%;" data-entity="${this._config.solar_power}">
+              <div class="pill pill-solar" style="top: ${pillPos.solar.y}%; left: ${pillPos.solar.x}%; --pill-scale: ${pillPos.solar.scale};" data-entity="${this._config.solar_power}">
                 <div class="pill-icon ${isSolarActive ? 'bg-solar' : 'bg-inactive'}">
                   <ha-icon icon="mdi:solar-power" class="${isSolarActive ? 'color-solar' : 'color-inactive'}"></ha-icon>
                 </div>
@@ -1779,7 +1828,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               </div>
 
               <!-- Grid Pill (on power pole) -->
-              <div class="pill pill-grid" style="top: ${pillPos.grid.y}%; left: ${pillPos.grid.x}%;" data-entity="${this._config.grid_power}">
+              <div class="pill pill-grid" style="top: ${pillPos.grid.y}%; left: ${pillPos.grid.x}%; --pill-scale: ${pillPos.grid.scale};" data-entity="${this._config.grid_power}">
                 <div class="pill-icon ${isGridImport || isGridExport ? 'bg-grid' : 'bg-inactive'}">
                   <ha-icon icon="mdi:transmission-tower" class="${isGridImport || isGridExport ? 'color-grid' : 'color-inactive'}"></ha-icon>
                 </div>
@@ -1790,7 +1839,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               </div>
 
               <!-- Home Pill (Center-right - on house) -->
-              <div class="pill pill-home" style="top: ${pillPos.home.y}%; left: ${pillPos.home.x}%;" data-entity="${this._config.home_consumption}">
+              <div class="pill pill-home" style="top: ${pillPos.home.y}%; left: ${pillPos.home.x}%; --pill-scale: ${pillPos.home.scale};" data-entity="${this._config.home_consumption}">
                 <div class="pill-icon bg-home">
                   <ha-icon icon="mdi:home-lightning-bolt" class="color-home"></ha-icon>
                 </div>
@@ -1801,7 +1850,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
               </div>
 
               <!-- Battery Pill (Right - battery storage) -->
-              <div class="pill pill-battery" style="top: ${pillPos.battery.y}%; left: ${pillPos.battery.x}%;" data-entity="${this._config.battery_soc}">
+              <div class="pill pill-battery" style="top: ${pillPos.battery.y}%; left: ${pillPos.battery.x}%; --pill-scale: ${pillPos.battery.scale};" data-entity="${this._config.battery_soc}">
                 <div class="pill-icon ${isBatteryCharging || isBatteryDischarging ? 'bg-battery' : 'bg-inactive'}">
                   <ha-icon icon="${batteryIcon}" class="${isBatteryCharging || isBatteryDischarging ? 'color-battery' : 'color-inactive'}"></ha-icon>
                 </div>
@@ -1813,7 +1862,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
 
               <!-- EV Pill (Bottom Left - carport) -->
               ${hasEV ? `
-              <div class="pill pill-ev" style="top: ${pillPos.ev.y}%; left: ${pillPos.ev.x}%;" data-entity="${this._config.ev_power}">
+              <div class="pill pill-ev" style="top: ${pillPos.ev.y}%; left: ${pillPos.ev.x}%; --pill-scale: ${pillPos.ev.scale};" data-entity="${this._config.ev_power}">
                 <div class="pill-icon ${isEvCharging ? 'bg-ev' : 'bg-inactive'}">
                   <ha-icon icon="mdi:car-electric" class="${isEvCharging ? 'color-ev' : 'color-inactive'}"></ha-icon>
                 </div>

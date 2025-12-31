@@ -193,6 +193,11 @@ class PrismButtonCard extends HTMLElement {
           transform: ${isActive ? 'translateY(2px)' : 'none'};
           cursor: pointer;
         }
+        ha-card:hover {
+          box-shadow: ${isActive 
+            ? 'inset 2px 2px 5px rgba(0,0,0,0.8), inset -1px -1px 2px rgba(255,255,255,0.1)' 
+            : '0 12px 24px -5px rgba(0, 0, 0, 0.6), 0 4px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08)'} !important;
+        }
         ha-card:active {
           transform: scale(0.98) ${isActive ? 'translateY(2px)' : ''};
         }
@@ -212,18 +217,39 @@ class PrismButtonCard extends HTMLElement {
           width: 48px;
           height: 48px;
         }
+        /* Neumorphic icon circle - Dark Theme with Glassmorphism blend */
         .icon-circle {
           position: absolute;
           width: 100%;
           height: 100%;
           border-radius: 50%;
+          
           ${iconColor ? `
-            background: ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.2)')};
-            box-shadow: 0 0 12px ${iconColor.shadow};
+            /* ACTIVE STATE - Raised with subtle color glow */
+            background: linear-gradient(145deg, 
+              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.2)')}, 
+              ${iconColor.color.replace('rgb', 'rgba').replace(')', ', 0.1)')});
+            box-shadow: 
+              /* Subtle outer shadows */
+              3px 3px 8px rgba(0, 0, 0, 0.3),
+              -2px -2px 6px rgba(255, 255, 255, 0.04),
+              /* Dezenter color glow */
+              0 0 12px ${iconColor.shadow.replace('0.6', '0.35')},
+              0 0 24px ${iconColor.shadow.replace('0.6', '0.15')},
+              /* Inner highlight */
+              inset 1px 1px 2px rgba(255, 255, 255, 0.1);
           ` : `
-            background: rgba(255, 255, 255, 0.05);
+            /* INACTIVE STATE - Glassmorphism + stronger inset */
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 
+              inset 3px 3px 8px rgba(0, 0, 0, 0.5),
+              inset -2px -2px 6px rgba(255, 255, 255, 0.05),
+              inset 1px 1px 3px rgba(0, 0, 0, 0.3);
           `}
-          transition: all 0.3s ease;
+          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .icon-wrapper {
           position: relative;
@@ -234,12 +260,17 @@ class PrismButtonCard extends HTMLElement {
         }
         ha-icon {
           --mdc-icon-size: 24px;
-          ${iconColor ? `color: ${iconColor.color} !important; filter: drop-shadow(0 0 6px ${iconColor.shadow});` : 'color: rgba(255, 255, 255, 0.6);'}
+          ${iconColor 
+            ? `color: ${iconColor.color} !important; 
+               filter: drop-shadow(0 0 6px ${iconColor.shadow.replace('0.6', '0.4')});` 
+            : 'color: rgba(255, 255, 255, 0.4);'}
+          transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .info {
           flex: 1;
           min-width: 0;
           overflow: hidden;
+          ${layout === 'vertical' ? 'text-align: center;' : ''}
         }
         .name {
           font-size: 16px;
