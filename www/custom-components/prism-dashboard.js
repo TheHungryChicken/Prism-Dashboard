@@ -13637,25 +13637,41 @@ class PrismEnergyCard extends HTMLElement {
           50% { opacity: 0.5; transform: scale(0.9); }
         }
         
-        /* 
-         * Smooth flow animation - simple dash moving along path
-         * Like reference: https://www.mediaevent.de/wp-content/uploads/2021/06/schach-dashline-lineart.svg
+        /*
+         * Pulsing beam animation - creates energy pulse effect with opacity
+         * Multiple beams with glowing pulse for dynamic energy flow
          */
         @keyframes flow-animation {
           0% {
             stroke-dashoffset: 100;
+            opacity: 0.3;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
           }
           100% {
             stroke-dashoffset: 0;
+            opacity: 0.3;
           }
         }
-        
+
         @keyframes flow-animation-reverse {
           0% {
             stroke-dashoffset: 0;
+            opacity: 0.3;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
           }
           100% {
             stroke-dashoffset: 100;
+            opacity: 0.3;
           }
         }
         
@@ -13673,13 +13689,13 @@ class PrismEnergyCard extends HTMLElement {
         }
         
         .flow-beam {
-          stroke-dasharray: 25 75;
-          animation: flow-animation 3s linear infinite;
+          stroke-dasharray: 15 35;
+          animation: flow-animation 2.5s ease-in-out infinite;
         }
-        
+
         .flow-beam.reverse {
-          stroke-dasharray: 25 75;
-          animation: flow-animation-reverse 3s linear infinite;
+          stroke-dasharray: 15 35;
+          animation: flow-animation-reverse 2.5s ease-in-out infinite;
         }
 
         /* Data Pills - Inlet Style */
@@ -15493,13 +15509,37 @@ class PrismEnergyHorizontalCard extends HTMLElement {
         }
         
         @keyframes flow-animation {
-          0% { stroke-dashoffset: 100; }
-          100% { stroke-dashoffset: 0; }
+          0% {
+            stroke-dashoffset: 100;
+            opacity: 0.3;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            stroke-dashoffset: 0;
+            opacity: 0.3;
+          }
         }
-        
+
         @keyframes flow-animation-reverse {
-          0% { stroke-dashoffset: 0; }
-          100% { stroke-dashoffset: 100; }
+          0% {
+            stroke-dashoffset: 0;
+            opacity: 0.3;
+          }
+          10% {
+            opacity: 1;
+          }
+          90% {
+            opacity: 1;
+          }
+          100% {
+            stroke-dashoffset: 100;
+            opacity: 0.3;
+          }
         }
         
         @keyframes track-pulse {
@@ -15512,13 +15552,13 @@ class PrismEnergyHorizontalCard extends HTMLElement {
         }
         
         .flow-beam {
-          stroke-dasharray: 25 75;
-          animation: flow-animation 3s linear infinite;
+          stroke-dasharray: 15 35;
+          animation: flow-animation 2.5s ease-in-out infinite;
         }
-        
+
         .flow-beam.reverse {
-          stroke-dasharray: 25 75;
-          animation: flow-animation-reverse 3s linear infinite;
+          stroke-dasharray: 15 35;
+          animation: flow-animation-reverse 2.5s ease-in-out infinite;
         }
 
         /* Data Pills - Fixed to image positions */
