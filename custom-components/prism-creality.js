@@ -49,7 +49,7 @@ class PrismCrealityCard extends HTMLElement {
       printer: '',
       name: 'Creality Printer',
       camera_entity: '',
-      image: '/local/custom-components/images/prism-creality.webp'
+      image: '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg'
     };
   }
 
@@ -762,7 +762,7 @@ class PrismCrealityCard extends HTMLElement {
     console.log('Prism Creality: Camera entity:', resolvedCameraEntity, 'Has image:', !!cameraImage, 'Auto-detected:', cameraEntityAuto);
     
     // Image path
-    const printerImg = this.config.image || '/local/custom-components/images/prism-creality.webp';
+    const printerImg = this.config.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg';
     
     // Get print filename
     const fileName = this.getEntityStateById(fileNameEntity) || '';
@@ -826,7 +826,7 @@ class PrismCrealityCard extends HTMLElement {
       name: this.config?.name || 'Creality Printer',
       cameraEntity: null,
       cameraImage: null,
-      printerImg: this.config?.image || '/local/custom-components/images/prism-creality.webp',
+      printerImg: this.config?.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg',
       fileName: 'benchy.gcode',
       isPrinting: true,
       isPaused: false,

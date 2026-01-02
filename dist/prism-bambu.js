@@ -58,7 +58,7 @@ class PrismBambuCard extends HTMLElement {
       printer: '',
       name: 'Bambu Lab Printer',
       camera_entity: '',
-      image: '/local/custom-components/images/prism-bambu-pic.png'
+      image: '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg'
     };
   }
 
@@ -128,6 +128,11 @@ class PrismBambuCard extends HTMLElement {
               name: 'power_switch',
               label: 'Power switch entity',
               selector: { entity: { domain: 'switch' } }
+            },
+            {
+              name: 'power_switch_icon',
+              label: 'Power switch icon (default: mdi:power)',
+              selector: { icon: {} }
             },
             {
               name: 'custom_light',
@@ -987,6 +992,7 @@ class PrismBambuCard extends HTMLElement {
     const powerSwitch = this.config.power_switch;
     const powerSwitchState = powerSwitch ? this._hass.states[powerSwitch] : null;
     const isPowerOn = powerSwitchState?.state === 'on';
+    const powerSwitchIcon = this.config.power_switch_icon || 'mdi:power';
     
     // Custom fan
     const customFan = this.config.custom_fan;
@@ -1078,7 +1084,7 @@ class PrismBambuCard extends HTMLElement {
     
     // Image path - use configured image or default
     // Supports both .png and .jpg formats
-    const printerImg = this.config.image || '/local/custom-components/images/prism-bambu-pic.png';
+    const printerImg = this.config.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg';
 
     // AMS Data - ONLY use manually configured AMS device (no auto-detect)
     let amsData = [];
@@ -1370,6 +1376,7 @@ class PrismBambuCard extends HTMLElement {
       customLightName,
       powerSwitch,
       isPowerOn,
+      powerSwitchIcon,
       // AMS sensors
       amsTemperature,
       amsHumidity,
@@ -1414,7 +1421,7 @@ class PrismBambuCard extends HTMLElement {
       name: this.config?.name || 'Bambu Lab Printer',
       cameraEntity: null,
       cameraImage: null,
-      printerImg: this.config?.image || '/local/custom-components/images/prism-bambu-pic.png',
+      printerImg: this.config?.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg',
       coverImageEntity: null,
       coverImageUrl: null,
       showCoverImage: false,
@@ -1440,6 +1447,7 @@ class PrismBambuCard extends HTMLElement {
       customLightName: 'Light',
       powerSwitch: null,
       isPowerOn: true,
+      powerSwitchIcon: 'mdi:power',
       // AMS sensors
       amsTemperature: 25,
       amsHumidity: 45,
@@ -2484,7 +2492,7 @@ class PrismBambuCard extends HTMLElement {
         <div class="main-visual ${!data.isLightOn ? 'light-off' : ''}">
             ${data.powerSwitch ? `
             <button class="power-corner-btn btn-power ${data.isPowerOn ? 'on' : 'off'}" title="Power ${data.isPowerOn ? 'Off' : 'On'}">
-                <ha-icon icon="mdi:power"></ha-icon>
+                <ha-icon icon="${data.powerSwitchIcon}"></ha-icon>
             </button>
             ` : ''}
             <div class="main-visual-inner">

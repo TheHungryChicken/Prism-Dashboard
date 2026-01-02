@@ -31,7 +31,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       home_consumption: "",
       ev_power: "",
       autarky: "",
-      image: "/local/custom-components/images/prism-energy-home.png",
+      image: "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
       max_solar_power: 10000,
       max_grid_power: 10000,
       max_consumption: 10000,
@@ -351,7 +351,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       home_consumption: config.home_consumption || "",
       ev_power: config.ev_power || "",
       autarky: config.autarky || "",
-      image: config.image || "/local/custom-components/images/prism-energy-home.png",
+      image: config.image || "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
       show_details: config.show_details !== false,
       // Max values for gauges (in Watts)
       max_solar_power: config.max_solar_power || 10000,

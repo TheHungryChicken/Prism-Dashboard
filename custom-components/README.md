@@ -157,7 +157,7 @@ A 3D printer card with glassmorphism design for displaying progress, temperature
   entity: sensor.3d_printer_state        # Sensor/Entity with printer status & attributes
   name: 3D Printer
   camera_entity: camera.3d_printer       # Optional: Printer camera
-  image: /local/custom-components/images/prism-3dprinter.png
+  image: /hacsfiles/Prism-Dashboard/images/printer-blank.jpg  # Optional, default is automatically used
 ```
 
 ---
@@ -175,7 +175,7 @@ A Bambu Lab 3D printer card with AMS (Automatic Material System) support, glassm
 - type: custom:prism-bambu
   printer: <device_id>  # Bambu Lab printer device (e.g., from Device Registry)
   name: Bambu Lab Printer  # Optional: Custom Name
-  image: /local/custom-components/images/prism-bambu-pic.png  # Optional: Printer image
+  image: /hacsfiles/Prism-Dashboard/images/printer-blank.jpg  # Optional: Printer image (default is automatically used)
 ```
 
 **Advanced Configuration (with AMS and Camera):**
@@ -238,10 +238,11 @@ The card reads AMS data from tray entities (`sensor.*_slot_1`, `sensor.*_slot_2`
 
 **Upload Image:**
 
-The printer image must be manually uploaded to Home Assistant:
-1. Copy the image to `/config/www/custom-components/images/prism-bambu-pic.png` (or `.jpg`)
-2. Or use a different path and specify it in the `image` field
-3. The card supports both `.png` and `.jpg` formats
+**Images:**
+- The default printer image (`printer-blank.jpg`) is automatically installed with HACS
+- Default path: `/hacsfiles/Prism-Dashboard/images/printer-blank.jpg`
+- You can specify a custom image path in the `image` field if needed
+- The card supports both `.png` and `.jpg` formats
 4. As a last fallback, a printer icon is displayed
 
 **Interactions:**
@@ -269,7 +270,7 @@ A Creality 3D printer card with glassmorphism design and full display of print p
 - type: custom:prism-creality
   printer: <device_id>  # Creality printer device (e.g., from Device Registry)
   name: Creality Printer  # Optional: Custom Name
-  image: /local/custom-components/images/prism-creality.webp  # Optional: Printer image
+  image: /hacsfiles/Prism-Dashboard/images/printer-blank.jpg  # Optional: Printer image (default is automatically used)
 ```
 
 **Advanced Configuration (with Camera and Light):**
@@ -327,11 +328,11 @@ The card automatically detects all relevant entities based on the printer device
 **Creality-Control Integration:**
 The card is compatible with the [Creality-Control Integration](https://github.com/SiloCityLabs/Creality-Control) and uses all available sensors, switches, buttons, and camera entities.
 
-**Upload Image:**
-
-The printer image must be manually uploaded to Home Assistant:
-1. Copy the image to `/config/www/custom-components/images/prism-creality.webp` (or `.png`/`.jpg`)
-2. Or use a different path and specify it in the `image` field
+**Images:**
+- The default printer image (`printer-blank.jpg`) is automatically installed with HACS
+- Default path: `/hacsfiles/Prism-Dashboard/images/printer-blank.jpg`
+- You can specify a custom image path in the `image` field if needed
+- The card supports `.webp`, `.png` and `.jpg` formats
 3. The card supports `.webp`, `.png` and `.jpg` formats
 4. As a last fallback, a printer icon is displayed
 
@@ -504,7 +505,7 @@ battery_power: sensor.fems79420_sum_essdischargepower
 home_consumption: sensor.fems79420_sum_consumptionactivepower
 ev_power: sensor.fems79420_evcs0_chargepower  # Optional - only if EV present
 autarky: sensor.energy_autarky  # Optional - template sensor from above
-image: /hacsfiles/images/prism-energy-home.png
+image: /hacsfiles/Prism-Dashboard/images/prism-energy-home.png  # Optional, default is automatically used
 show_details: true
 ```
 
@@ -588,7 +589,7 @@ The default image is already included. However, you can also use your own image:
 
 **HACS Installation:**
 ```
-/hacsfiles/images/prism-energy-home.png
+/hacsfiles/Prism-Dashboard/images/prism-energy-home.png
 ```
 
 **Manual Installation:**
@@ -638,7 +639,7 @@ battery_power: sensor.fems79420_sum_essdischargepower
 home_consumption: sensor.fems79420_sum_consumptionactivepower
 ev_power: sensor.fems79420_evcs0_chargepower  # Optional
 autarky: sensor.energy_autarky  # Optional
-image: /hacsfiles/images/prism-energy-home.png
+image: /hacsfiles/Prism-Dashboard/images/prism-energy-home.png  # Optional, default is automatically used
 show_details: true  # Show details panel on right
 ```
 

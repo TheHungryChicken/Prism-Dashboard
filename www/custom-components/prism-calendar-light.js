@@ -3,6 +3,9 @@ class PrismCalendarLightCard extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
+    this._events = [];
+    this._loading = false;
+    this._lastFetch = 0;
   }
 
   static getStubConfig() {
@@ -42,7 +45,8 @@ class PrismCalendarLightCard extends HTMLElement {
     if (!config.entity) {
       throw new Error('Please define an entity');
     }
-    this.config = config;
+    // Create a copy to avoid modifying read-only config object
+    this.config = { ...config };
     // Set defaults
     if (!this.config.max_events) {
       this.config.max_events = 3;
@@ -58,6 +62,7 @@ class PrismCalendarLightCard extends HTMLElement {
     } else {
       this.config.dot_color = "#f87171";
     }
+    this._events = [];
     this.render();
   }
 
@@ -66,8 +71,105 @@ class PrismCalendarLightCard extends HTMLElement {
     if (this.config && this.config.entity) {
       const entity = hass.states[this.config.entity];
       this._entity = entity || null;
-      this.render();
+      
+      // Fetch calendar events every 60 seconds or on first load
+      const now = Date.now();
+      if (now - this._lastFetch > 60000 || this._events.length === 0) {
+        this._fetchCalendarEvents();
+      } else {
+        this.render();
+      }
     }
+  }
+
+  async _fetchCalendarEvents() {
+    if (!this._hass || !this.config.entity || this._loading) return;
+    
+    this._loading = true;
+    this._lastFetch = Date.now();
+    
+    try {
+      // Calculate date range: now to 30 days in the future
+      const now = new Date();
+      const startDate = now.toISOString();
+      const endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();
+      
+      // Use REST API (works with Google Calendar Integration)
+      const authToken = this._hass.auth.data.access_token || this._hass.auth.accessToken;
+      const response = await fetch(
+        `/api/calendars/${this.config.entity}?start=${encodeURIComponent(startDate)}&end=${encodeURIComponent(endDate)}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const eventsArray = await response.json();
+      
+      // Process events - REST API returns array directly
+      if (Array.isArray(eventsArray) && eventsArray.length > 0) {
+        this._events = eventsArray
+          .map(event => {
+            // REST API returns: { start: { dateTime: "..." } or { date: "..." }, end: {...}, summary: "...", ... }
+            const title = event.summary || event.title || event.message || 'Unbenannt';
+            // Handle both dateTime (timed) and date (all-day) formats
+            const start = event.start?.dateTime || event.start?.date || event.start;
+            const end = event.end?.dateTime || event.end?.date || event.end;
+            
+            return { title, start, end };
+          })
+          .filter(event => event.start)
+          .sort((a, b) => {
+            const dateA = new Date(a.start);
+            const dateB = new Date(b.start);
+            return dateA - dateB;
+          })
+          .slice(0, this.config.max_events || 3);
+      } else {
+        // Fallback to entity attributes if REST API returns empty
+        if (this._entity && this._entity.attributes) {
+          const attr = this._entity.attributes;
+          if (attr.message && attr.start_time) {
+            this._events = [{
+              title: attr.message,
+              start: attr.start_time,
+              end: attr.end_time || attr.start_time
+            }];
+          } else {
+            this._events = [];
+          }
+        } else {
+          this._events = [];
+        }
+      }
+      
+    } catch (error) {
+      console.warn('Prism Calendar Light: Could not fetch calendar events:', error);
+      // Fallback to entity attributes
+      if (this._entity && this._entity.attributes) {
+        const attr = this._entity.attributes;
+        if (attr.message && attr.start_time) {
+          this._events = [{
+            title: attr.message,
+            start: attr.start_time,
+            end: attr.end_time || attr.start_time
+          }];
+        } else {
+          this._events = [];
+        }
+      } else {
+        this._events = [];
+      }
+    }
+    
+    this._loading = false;
+    this.render();
   }
 
   getCardSize() {
@@ -83,48 +185,24 @@ class PrismCalendarLightCard extends HTMLElement {
   render() {
     if (!this.config || !this.config.entity) return;
     
-    const attr = this._entity ? this._entity.attributes : {};
     const maxEvents = this.config.max_events || 3;
     const iconColor = this._normalizeColor(this.config.icon_color || "#f87171");
     const dotColor = this._normalizeColor(this.config.dot_color || "#f87171");
     
-    // Get all events from calendar entity
-    let events = [];
-    if (attr.all_events && Array.isArray(attr.all_events)) {
-      // all_events is an array of event objects
-      events = attr.all_events
-        .map(event => ({
-          title: event.summary || event.message || 'Unbenannt',
-          start: event.start || event.start_time || event.dtstart,
-          end: event.end || event.end_time || event.dtend
-        }))
-        .filter(event => event.start) // Only events with a start time
-        .sort((a, b) => {
-          // Sort by start time (earliest first)
-          const dateA = new Date(a.start);
-          const dateB = new Date(b.start);
-          return dateA - dateB;
-        })
-        .slice(0, maxEvents); // Take only the first maxEvents
-    } else if (attr.message && attr.start_time) {
-      // Fallback: use the single next event if all_events is not available
-      events = [{
-        title: attr.message,
-        start: attr.start_time
-      }];
-    }
+    // Use fetched events
+    const events = this._events.slice(0, maxEvents);
     
     // Generate event items
     let eventItems = '';
     if (events.length === 0) {
-      // No events
+      // No events or still loading
       eventItems = `
         <div class="event-item" style="opacity: 0.6;">
           <div class="timeline">
             <div class="dot"></div>
           </div>
           <div class="event-info">
-            <div class="event-title">Keine kommenden Termine</div>
+            <div class="event-title">${this._loading ? 'Lade Termine...' : 'Keine kommenden Termine'}</div>
             <div class="event-time">
               <ha-icon icon="mdi:clock-outline" style="--mdc-icon-size: 12px;"></ha-icon>
               -
@@ -145,18 +223,25 @@ class PrismCalendarLightCard extends HTMLElement {
               const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
               const eventDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
               
+              // Check if it's an all-day event (no time component or midnight)
+              const isAllDay = event.start.length === 10 || (date.getHours() === 0 && date.getMinutes() === 0);
+              
               if (eventDate.getTime() === today.getTime()) {
                 // Today
-                timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                timeStr = isAllDay ? 'Heute (ganztägig)' : `Heute, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
               } else {
                 // Future date
                 const daysDiff = Math.floor((eventDate - today) / (1000 * 60 * 60 * 24));
                 if (daysDiff === 1) {
-                  timeStr = `Morgen, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                  timeStr = isAllDay ? 'Morgen (ganztägig)' : `Morgen, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
                 } else if (daysDiff > 1 && daysDiff <= 7) {
-                  timeStr = date.toLocaleDateString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+                  timeStr = isAllDay 
+                    ? date.toLocaleDateString('de-DE', { weekday: 'long' }) + ' (ganztägig)'
+                    : date.toLocaleDateString('de-DE', { weekday: 'short' }) + ', ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 } else {
-                  timeStr = date.toLocaleDateString([], { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+                  timeStr = isAllDay
+                    ? date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ' (ganztägig)'
+                    : date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) + ', ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 }
               }
             }
@@ -207,14 +292,17 @@ class PrismCalendarLightCard extends HTMLElement {
           font-family: system-ui, -apple-system, sans-serif;
         }
         .card {
-          background: rgba(255, 255, 255, 0.7);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: rgba(255, 255, 255, 0.65);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           border-radius: 16px;
-          border: 1px solid rgba(0,0,0,0.05);
-          border-top: 1px solid rgba(255, 255, 255, 0.8);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-          box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0,0,0,0.05);
+          border: 1px solid rgba(255,255,255,0.6);
+          border-top: 1px solid rgba(255, 255, 255, 0.9);
+          border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+          box-shadow: 
+            0 10px 30px -5px rgba(0, 0, 0, 0.15),
+            0 4px 10px rgba(0,0,0,0.08),
+            inset 0 1px 1px rgba(255,255,255,0.9);
           padding: 20px;
           color: #1a1a1a;
         }
@@ -269,7 +357,7 @@ class PrismCalendarLightCard extends HTMLElement {
             </div>
             <div>
                 <div class="title">Kalender</div>
-                <div class="subtitle">Nächstes Event</div>
+                <div class="subtitle">${events.length > 0 ? `${events.length} Termine` : 'Nächstes Event'}</div>
             </div>
         </div>
         

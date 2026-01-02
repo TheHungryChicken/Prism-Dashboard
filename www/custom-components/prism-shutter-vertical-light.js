@@ -177,13 +177,16 @@ class PrismShutterVerticalLightCard extends HTMLElement {
             width: 140px;
             height: 340px;
             border-radius: 24px;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0,0,0,0.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.8);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0,0,0,0.05);
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-top: 1px solid rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+            box-shadow: 
+              0 10px 30px -5px rgba(0, 0, 0, 0.15),
+              0 4px 10px rgba(0,0,0,0.08),
+              inset 0 1px 1px rgba(255,255,255,0.9);
             display: flex;
             flex-direction: row;
             padding: 12px;
@@ -233,6 +236,14 @@ class PrismShutterVerticalLightCard extends HTMLElement {
               background: rgba(59, 130, 246, 0.2); color: #60a5fa;
               display: flex; align-items: center; justify-content: center;
               box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+              position: relative;
+          }
+          .icon-box ha-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 100%;
           }
           .info {
               text-align: center; width: 100%;
@@ -255,21 +266,35 @@ class PrismShutterVerticalLightCard extends HTMLElement {
           
           .control-btn {
               width: 100%; border-radius: 8px;
-              background: rgba(0,0,0,0.03);
-              border: 1px solid rgba(0,0,0,0.05);
+              background: linear-gradient(145deg, #f0f0f0, #ffffff);
+              border: 1px solid rgba(255,255,255,0.8);
+              box-shadow: 
+                2px 2px 6px rgba(0,0,0,0.08),
+                -2px -2px 6px rgba(255,255,255,0.9);
               display: flex; align-items: center; justify-content: center;
               color: rgba(0,0,0,0.7);
               cursor: pointer;
               box-shadow: 0 2px 4px -1px rgba(0,0,0,0.1);
               transition: all 0.2s;
+              position: relative;
+          }
+          .control-btn ha-icon {
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              width: 100%;
+              height: 100%;
           }
           .control-btn.btn-up, .control-btn.btn-down { height: 36px; }
           .control-btn.btn-stop { height: 32px; }
           
           .control-btn:active {
-              background: rgba(255, 255, 255, 0.9);
-              box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1), inset -1px -1px 2px rgba(255,255,255,0.8);
-              color: #1a1a1a; border-top: 1px solid rgba(255,255,255,0.6);
+              background: linear-gradient(145deg, #e6e6e6, #f0f0f0);
+              box-shadow: 
+                inset 3px 3px 6px rgba(0,0,0,0.12),
+                inset -2px -2px 4px rgba(255,255,255,0.8);
+              color: #1a1a1a; 
+              border: 1px solid rgba(0,0,0,0.08);
           }
   
         </style>

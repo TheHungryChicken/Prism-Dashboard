@@ -49,7 +49,7 @@ class PrismCrealityCard extends HTMLElement {
       printer: '',
       name: 'Creality Printer',
       camera_entity: '',
-      image: '/local/custom-components/images/prism-creality.webp'
+      image: '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg'
     };
   }
 
@@ -102,6 +102,11 @@ class PrismCrealityCard extends HTMLElement {
           name: 'power_switch',
           label: 'Power switch (optional)',
           selector: { entity: { domain: 'switch' } }
+        },
+        {
+          name: 'power_switch_icon',
+          label: 'Power switch icon (default: mdi:power)',
+          selector: { icon: {} }
         }
       ]
     };
@@ -733,6 +738,7 @@ class PrismCrealityCard extends HTMLElement {
     const powerSwitch = this.config.power_switch;
     const powerSwitchState = powerSwitch ? this._hass.states[powerSwitch] : null;
     const isPowerOn = powerSwitchState?.state === 'on';
+    const powerSwitchIcon = this.config.power_switch_icon || 'mdi:power';
     
     // Debug: Log light entity details
     console.log('Prism Creality: Light - configured:', this.config.light_switch, 'auto-switch:', lightSwitchEntity, 'auto-sensor:', lightSensorEntity);
@@ -756,7 +762,7 @@ class PrismCrealityCard extends HTMLElement {
     console.log('Prism Creality: Camera entity:', resolvedCameraEntity, 'Has image:', !!cameraImage, 'Auto-detected:', cameraEntityAuto);
     
     // Image path
-    const printerImg = this.config.image || '/local/custom-components/images/prism-creality.webp';
+    const printerImg = this.config.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg';
     
     // Get print filename
     const fileName = this.getEntityStateById(fileNameEntity) || '';
@@ -790,7 +796,8 @@ class PrismCrealityCard extends HTMLElement {
       humidity,
       customTemp,
       powerSwitch,
-      isPowerOn
+      isPowerOn,
+      powerSwitchIcon
     };
     
     // Debug: Log key data
@@ -819,7 +826,7 @@ class PrismCrealityCard extends HTMLElement {
       name: this.config?.name || 'Creality Printer',
       cameraEntity: null,
       cameraImage: null,
-      printerImg: this.config?.image || '/local/custom-components/images/prism-creality.webp',
+      printerImg: this.config?.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg',
       fileName: 'benchy.gcode',
       isPrinting: true,
       isPaused: false,
@@ -829,7 +836,8 @@ class PrismCrealityCard extends HTMLElement {
       humidity: null,
       customTemp: null,
       powerSwitch: null,
-      isPowerOn: true
+      isPowerOn: true,
+      powerSwitchIcon: 'mdi:power'
     };
   }
 
@@ -1333,7 +1341,7 @@ class PrismCrealityCard extends HTMLElement {
         <div class="main-visual ${!data.isLightOn ? 'light-off' : ''}">
             ${data.powerSwitch ? `
             <button class="power-corner-btn btn-power ${data.isPowerOn ? 'on' : 'off'}" title="Power ${data.isPowerOn ? 'Off' : 'On'}">
-                <ha-icon icon="mdi:power"></ha-icon>
+                <ha-icon icon="${data.powerSwitchIcon}"></ha-icon>
             </button>
             ` : ''}
             <div class="main-visual-inner">
