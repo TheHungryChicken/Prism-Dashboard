@@ -836,14 +836,18 @@ class PrismEnergyCard extends HTMLElement {
       <g class="flow-group ${className}" style="display: ${display};">
         <!-- Background track (pulsing, async) -->
         <path d="${path}" fill="none" stroke="${color}" stroke-width="0.5" stroke-linecap="round" class="flow-track" />
-        
-        <!-- Glowing animated beam with SVG filter -->
-        <path d="${path}" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.9" stroke-linecap="round" 
-              class="flow-beam ${direction}" filter="url(#strokeGlow)" />
-        
-        <!-- Bright core with soft edges -->
-        <path d="${path}" fill="none" stroke="${color}" stroke-width="0.5" stroke-opacity="0.85" stroke-linecap="round" 
-              class="flow-beam ${direction}" filter="url(#softEdge)" />
+
+        <!-- Outer glow (longest, dimmest) - creates trailing edge -->
+        <path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.3" stroke-linecap="round"
+              class="flow-beam-outer ${direction}" filter="url(#strokeGlow)" />
+
+        <!-- Middle glow (medium brightness) -->
+        <path d="${path}" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.6" stroke-linecap="round"
+              class="flow-beam-middle ${direction}" filter="url(#strokeGlow)" />
+
+        <!-- Bright core (shortest, brightest) - creates leading edge -->
+        <path d="${path}" fill="none" stroke="${color}" stroke-width="0.8" stroke-opacity="1.0" stroke-linecap="round"
+              class="flow-beam-core ${direction}" filter="url(#softEdge)" />
       </g>
     `;
   }
@@ -1702,34 +1706,28 @@ class PrismEnergyCard extends HTMLElement {
         @keyframes flow-animation {
           0% {
             stroke-dashoffset: 100;
-            opacity: 0.3;
+            opacity: 0.6;
           }
-          10% {
-            opacity: 1;
-          }
-          90% {
+          50% {
             opacity: 1;
           }
           100% {
             stroke-dashoffset: 0;
-            opacity: 0.3;
+            opacity: 0.6;
           }
         }
 
         @keyframes flow-animation-reverse {
           0% {
             stroke-dashoffset: 0;
-            opacity: 0.3;
+            opacity: 0.6;
           }
-          10% {
-            opacity: 1;
-          }
-          90% {
+          50% {
             opacity: 1;
           }
           100% {
             stroke-dashoffset: 100;
-            opacity: 0.3;
+            opacity: 0.6;
           }
         }
         
@@ -1745,15 +1743,40 @@ class PrismEnergyCard extends HTMLElement {
         .flow-track {
           animation: track-pulse 2.2s ease-in-out infinite;
         }
-        
-        .flow-beam {
-          stroke-dasharray: 15 35;
+
+        /* Layered pulse effect - creates gradient energy packet */
+        .flow-beam-outer {
+          stroke-dasharray: 20 30;
           animation: flow-animation 2.5s ease-in-out infinite;
         }
 
-        .flow-beam.reverse {
-          stroke-dasharray: 15 35;
+        .flow-beam-outer.reverse {
+          stroke-dasharray: 20 30;
           animation: flow-animation-reverse 2.5s ease-in-out infinite;
+        }
+
+        .flow-beam-middle {
+          stroke-dasharray: 12 38;
+          animation: flow-animation 2.5s ease-in-out infinite;
+          animation-delay: 0.1s;
+        }
+
+        .flow-beam-middle.reverse {
+          stroke-dasharray: 12 38;
+          animation: flow-animation-reverse 2.5s ease-in-out infinite;
+          animation-delay: 0.1s;
+        }
+
+        .flow-beam-core {
+          stroke-dasharray: 6 44;
+          animation: flow-animation 2.5s ease-in-out infinite;
+          animation-delay: 0.15s;
+        }
+
+        .flow-beam-core.reverse {
+          stroke-dasharray: 6 44;
+          animation: flow-animation-reverse 2.5s ease-in-out infinite;
+          animation-delay: 0.15s;
         }
 
         /* Data Pills - Inlet Style */
