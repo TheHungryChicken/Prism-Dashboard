@@ -1,6 +1,6 @@
 {
   "name": "Prism Dashboard",
-  "content_in_root": false,
+  "filename": "prism-dashboard.js",
   "render_readme": true,
   "homeassistant": "2024.1.0"
 }
