@@ -3,7 +3,7 @@
  * https://github.com/BangerTech/Prism-Dashboard
  * 
  * Version: 1.0.0
- * Build Date: 2026-01-02T08:05:36.189Z
+ * Build Date: 2026-01-02T08:11:06.616Z
  * 
  * This file contains all Prism custom cards bundled together.
  * Just add this single file as a resource in Lovelace:
@@ -11424,7 +11424,7 @@ class PrismEnergyCard extends HTMLElement {
       home_consumption: "",
       ev_power: "",
       autarky: "",
-      image: "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
+      image: "/local/community/Prism-Dashboard/images/prism-energy-home.png",
       max_solar_power: 10000,
       max_grid_power: 10000,
       max_consumption: 10000,
@@ -11763,7 +11763,7 @@ class PrismEnergyCard extends HTMLElement {
       home_consumption: config.home_consumption || "",
       ev_power: config.ev_power || "",
       autarky: config.autarky || "",
-      image: config.image || "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
+      image: config.image || "/local/community/Prism-Dashboard/images/prism-energy-home.png",
       show_details: config.show_details !== false,
       // Max values for progress bars (in Watts)
       max_solar_power: config.max_solar_power || 10000,
@@ -13645,7 +13645,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       home_consumption: "",
       ev_power: "",
       autarky: "",
-      image: "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
+      image: "/local/community/Prism-Dashboard/images/prism-energy-home.png",
       max_solar_power: 10000,
       max_grid_power: 10000,
       max_consumption: 10000,
@@ -13965,7 +13965,7 @@ class PrismEnergyHorizontalCard extends HTMLElement {
       home_consumption: config.home_consumption || "",
       ev_power: config.ev_power || "",
       autarky: config.autarky || "",
-      image: config.image || "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
+      image: config.image || "/local/community/Prism-Dashboard/images/prism-energy-home.png",
       show_details: config.show_details !== false,
       // Max values for gauges (in Watts)
       max_solar_power: config.max_solar_power || 10000,
@@ -15647,7 +15647,7 @@ class Prism3DPrinterCard extends HTMLElement {
       entity: "sensor.3d_printer",
       name: "3D Printer",
       camera_entity: "camera.3d_printer",
-      image: "/hacsfiles/Prism-Dashboard/images/printer-blank.jpg",
+      image: "/local/community/Prism-Dashboard/images/printer-blank.jpg",
     };
   }
 
@@ -15733,7 +15733,7 @@ class Prism3DPrinterCard extends HTMLElement {
     const cameraImage =
       cameraState?.attributes?.entity_picture ||
       cfg.image ||
-      "/hacsfiles/Prism-Dashboard/images/printer-blank.jpg";
+      "/local/community/Prism-Dashboard/images/printer-blank.jpg";
 
     const isLightOn = attr.light === "on" || true; // keep bright look by default
 
@@ -16266,7 +16266,7 @@ class PrismBambuCard extends HTMLElement {
       printer: '',
       name: 'Bambu Lab Printer',
       camera_entity: '',
-      image: '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg'
+      image: '/local/community/Prism-Dashboard/images/printer-blank.jpg'
     };
   }
 
@@ -17292,7 +17292,7 @@ class PrismBambuCard extends HTMLElement {
     
     // Image path - use configured image or default
     // Supports both .png and .jpg formats
-    const printerImg = this.config.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg';
+    const printerImg = this.config.image || '/local/community/Prism-Dashboard/images/printer-blank.jpg';
 
     // AMS Data - ONLY use manually configured AMS device (no auto-detect)
     let amsData = [];
@@ -17629,7 +17629,7 @@ class PrismBambuCard extends HTMLElement {
       name: this.config?.name || 'Bambu Lab Printer',
       cameraEntity: null,
       cameraImage: null,
-      printerImg: this.config?.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg',
+      printerImg: this.config?.image || '/local/community/Prism-Dashboard/images/printer-blank.jpg',
       coverImageEntity: null,
       coverImageUrl: null,
       showCoverImage: false,
@@ -18929,7 +18929,7 @@ class PrismCrealityCard extends HTMLElement {
       printer: '',
       name: 'Creality Printer',
       camera_entity: '',
-      image: '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg'
+      image: '/local/community/Prism-Dashboard/images/printer-blank.jpg'
     };
   }
 
@@ -19642,7 +19642,7 @@ class PrismCrealityCard extends HTMLElement {
     console.log('Prism Creality: Camera entity:', resolvedCameraEntity, 'Has image:', !!cameraImage, 'Auto-detected:', cameraEntityAuto);
     
     // Image path
-    const printerImg = this.config.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg';
+    const printerImg = this.config.image || '/local/community/Prism-Dashboard/images/printer-blank.jpg';
     
     // Get print filename
     const fileName = this.getEntityStateById(fileNameEntity) || '';
@@ -19706,7 +19706,7 @@ class PrismCrealityCard extends HTMLElement {
       name: this.config?.name || 'Creality Printer',
       cameraEntity: null,
       cameraImage: null,
-      printerImg: this.config?.image || '/hacsfiles/Prism-Dashboard/images/printer-blank.jpg',
+      printerImg: this.config?.image || '/local/community/Prism-Dashboard/images/printer-blank.jpg',
       fileName: 'benchy.gcode',
       isPrinting: true,
       isPaused: false,

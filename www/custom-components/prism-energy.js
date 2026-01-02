@@ -34,7 +34,7 @@ class PrismEnergyCard extends HTMLElement {
       home_consumption: "",
       ev_power: "",
       autarky: "",
-      image: "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
+      image: "/local/community/Prism-Dashboard/images/prism-energy-home.png",
       max_solar_power: 10000,
       max_grid_power: 10000,
       max_consumption: 10000,
@@ -373,7 +373,7 @@ class PrismEnergyCard extends HTMLElement {
       home_consumption: config.home_consumption || "",
       ev_power: config.ev_power || "",
       autarky: config.autarky || "",
-      image: config.image || "/hacsfiles/Prism-Dashboard/images/prism-energy-home.png",
+      image: config.image || "/local/community/Prism-Dashboard/images/prism-energy-home.png",
       show_details: config.show_details !== false,
       // Max values for progress bars (in Watts)
       max_solar_power: config.max_solar_power || 10000,
