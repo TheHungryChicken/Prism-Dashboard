@@ -12768,28 +12768,47 @@ class PrismEnergyCard extends HTMLElement {
   }
 
   // Generate animated flow path with real SVG filter glow (CodePen style)
+  // Generate animated flow path with gradient pulse effect
   _renderFlow(path, color, active, reverse = false, className = '') {
-    const direction = reverse ? 'reverse' : '';
     const display = active ? 'block' : 'none';
-    // Create unique filter ID based on color
-    const filterId = `glow-${color.replace('#', '').replace(/[^a-zA-Z0-9]/g, '')}`;
-    
+    const uniqueId = className.replace(/[^a-zA-Z0-9]/g, '');
+    const gradientId = `gradient-${uniqueId}`;
+    const maskId = `mask-${uniqueId}`;
+    const pathId = `path-${uniqueId}`;
+    const duration = reverse ? '-2.5s' : '2.5s';
+
     return `
+      <defs>
+        <!-- Radial gradient for pulse effect -->
+        <radialGradient id="${gradientId}">
+          <stop offset="0%" stop-color="${color}" stop-opacity="1" />
+          <stop offset="40%" stop-color="${color}" stop-opacity="0.8" />
+          <stop offset="100%" stop-color="${color}" stop-opacity="0" />
+        </radialGradient>
+
+        <!-- Path definition -->
+        <path id="${pathId}" d="${path}" />
+
+        <!-- Mask with moving dashed line -->
+        <mask id="${maskId}">
+          <use href="#${pathId}" stroke="white" stroke-width="3" fill="none"
+               stroke-dasharray="25 1000" stroke-linecap="round"
+               class="flow-mask ${reverse ? 'reverse' : ''}" />
+        </mask>
+      </defs>
+
       <g class="flow-group ${className}" style="display: ${display};">
-        <!-- Background track (pulsing, async) -->
-        <path d="${path}" fill="none" stroke="${color}" stroke-width="0.5" stroke-linecap="round" class="flow-track" />
+        <!-- Background track -->
+        <path d="${path}" fill="none" stroke="${color}" stroke-width="0.5" stroke-opacity="0.3" stroke-linecap="round" class="flow-track" />
 
-        <!-- Outer glow (longest, dimmest) - creates trailing edge -->
-        <path d="${path}" fill="none" stroke="${color}" stroke-width="1.5" stroke-opacity="0.3" stroke-linecap="round"
-              class="flow-beam-outer ${direction}" filter="url(#strokeGlow)" />
-
-        <!-- Middle glow (medium brightness) -->
-        <path d="${path}" fill="none" stroke="${color}" stroke-width="1.2" stroke-opacity="0.6" stroke-linecap="round"
-              class="flow-beam-middle ${direction}" filter="url(#strokeGlow)" />
-
-        <!-- Bright core (shortest, brightest) - creates leading edge -->
-        <path d="${path}" fill="none" stroke="${color}" stroke-width="0.8" stroke-opacity="1.0" stroke-linecap="round"
-              class="flow-beam-core ${direction}" filter="url(#softEdge)" />
+        <!-- Animated gradient pulse -->
+        <g mask="url(#${maskId})">
+          <circle r="30" fill="url(#${gradientId})" filter="url(#strokeGlow)">
+            <animateMotion dur="${duration}" repeatCount="indefinite">
+              <mpath href="#${pathId}" />
+            </animateMotion>
+          </circle>
+        </g>
       </g>
     `;
   }
@@ -13686,39 +13705,13 @@ class PrismEnergyCard extends HTMLElement {
           animation: track-pulse 2.2s ease-in-out infinite;
         }
 
-        /* Layered pulse effect - creates gradient energy packet */
-        .flow-beam-outer {
-          stroke-dasharray: 20 30;
+        /* Mask animation for gradient pulse effect */
+        .flow-mask {
           animation: flow-animation 2.5s linear infinite;
         }
 
-        .flow-beam-outer.reverse {
-          stroke-dasharray: 20 30;
+        .flow-mask.reverse {
           animation: flow-animation-reverse 2.5s linear infinite;
-        }
-
-        .flow-beam-middle {
-          stroke-dasharray: 12 38;
-          animation: flow-animation 2.5s linear infinite;
-          animation-delay: 0.1s;
-        }
-
-        .flow-beam-middle.reverse {
-          stroke-dasharray: 12 38;
-          animation: flow-animation-reverse 2.5s linear infinite;
-          animation-delay: 0.1s;
-        }
-
-        .flow-beam-core {
-          stroke-dasharray: 6 44;
-          animation: flow-animation 2.5s linear infinite;
-          animation-delay: 0.15s;
-        }
-
-        .flow-beam-core.reverse {
-          stroke-dasharray: 6 44;
-          animation: flow-animation-reverse 2.5s linear infinite;
-          animation-delay: 0.15s;
         }
 
         /* Data Pills - Inlet Style */
@@ -15568,39 +15561,13 @@ class PrismEnergyHorizontalCard extends HTMLElement {
           animation: track-pulse 2.2s ease-in-out infinite;
         }
 
-        /* Layered pulse effect - creates gradient energy packet */
-        .flow-beam-outer {
-          stroke-dasharray: 20 30;
+        /* Mask animation for gradient pulse effect */
+        .flow-mask {
           animation: flow-animation 2.5s linear infinite;
         }
 
-        .flow-beam-outer.reverse {
-          stroke-dasharray: 20 30;
+        .flow-mask.reverse {
           animation: flow-animation-reverse 2.5s linear infinite;
-        }
-
-        .flow-beam-middle {
-          stroke-dasharray: 12 38;
-          animation: flow-animation 2.5s linear infinite;
-          animation-delay: 0.1s;
-        }
-
-        .flow-beam-middle.reverse {
-          stroke-dasharray: 12 38;
-          animation: flow-animation-reverse 2.5s linear infinite;
-          animation-delay: 0.1s;
-        }
-
-        .flow-beam-core {
-          stroke-dasharray: 6 44;
-          animation: flow-animation 2.5s linear infinite;
-          animation-delay: 0.15s;
-        }
-
-        .flow-beam-core.reverse {
-          stroke-dasharray: 6 44;
-          animation: flow-animation-reverse 2.5s linear infinite;
-          animation-delay: 0.15s;
         }
 
         /* Data Pills - Fixed to image positions */
