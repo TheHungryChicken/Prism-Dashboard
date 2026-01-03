@@ -1747,35 +1747,35 @@ class PrismEnergyCard extends HTMLElement {
         /* Layered pulse effect - creates gradient energy packet */
         .flow-beam-outer {
           stroke-dasharray: 20 30;
-          animation: flow-animation 2.5s ease-in-out infinite;
+          animation: flow-animation 2.5s linear infinite;
         }
 
         .flow-beam-outer.reverse {
           stroke-dasharray: 20 30;
-          animation: flow-animation-reverse 2.5s ease-in-out infinite;
+          animation: flow-animation-reverse 2.5s linear infinite;
         }
 
         .flow-beam-middle {
           stroke-dasharray: 12 38;
-          animation: flow-animation 2.5s ease-in-out infinite;
+          animation: flow-animation 2.5s linear infinite;
           animation-delay: 0.1s;
         }
 
         .flow-beam-middle.reverse {
           stroke-dasharray: 12 38;
-          animation: flow-animation-reverse 2.5s ease-in-out infinite;
+          animation: flow-animation-reverse 2.5s linear infinite;
           animation-delay: 0.1s;
         }
 
         .flow-beam-core {
           stroke-dasharray: 6 44;
-          animation: flow-animation 2.5s ease-in-out infinite;
+          animation: flow-animation 2.5s linear infinite;
           animation-delay: 0.15s;
         }
 
         .flow-beam-core.reverse {
           stroke-dasharray: 6 44;
-          animation: flow-animation-reverse 2.5s ease-in-out infinite;
+          animation: flow-animation-reverse 2.5s linear infinite;
           animation-delay: 0.15s;
         }
 
